@@ -1,21 +1,33 @@
 import React, { Component } from 'react';
-import logo from './logo.svg';
-import './App.css';
+import MusicTrack from './logic/MusicTrack.js';
+import AudioContext from './structure/AudioContext';
 
 class App extends Component {
+  constructor(...args) {
+    super(...args);
+    this.musicTrack = new MusicTrack(
+      process.env.REACT_APP_DEFAULT_MUSIC_FILE,
+      this.props.audioContext
+    );
+  }
+
+  componentDidMount() {
+    this.musicTrack.preload();
+  }
+
   render() {
     return (
-      <div className="App">
-        <header className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
-          <h1 className="App-title">Welcome to React</h1>
-        </header>
-        <p className="App-intro">
-          To get started, edit <code>src/App.js</code> and save to reload.
-        </p>
+      <div>
+        <button onClick={() => this.musicTrack.play()}>Play</button>
       </div>
     );
   }
 }
 
-export default App;
+const AppController = () => (
+  <AudioContext>
+    {audioContext => <App audioContext={audioContext} />}
+  </AudioContext>
+);
+
+export default AppController;

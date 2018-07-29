@@ -2,8 +2,13 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
 import App from './App';
-import * as audioTests from './audio-tests';
+import { Provider as AudioContextProvider } from './structure/AudioContext';
 
-ReactDOM.render(<App />, document.getElementById('root'));
+const audioContext = new AudioContext();
 
-audioTests.start();
+ReactDOM.render(
+  <AudioContextProvider value={audioContext}>
+    <App />
+  </AudioContextProvider>,
+  document.getElementById('root')
+);
