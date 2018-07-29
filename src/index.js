@@ -2,13 +2,15 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
 import App from './App';
-import { Provider as AudioContextProvider } from './structure/AudioContext';
+import Player from './logic/Player';
+import { Provider as PlayerContextProvider } from './structure/PlayerContext';
 
 const audioContext = new AudioContext();
+const player = new Player(audioContext);
 
 ReactDOM.render(
-  <AudioContextProvider value={audioContext}>
+  <PlayerContextProvider value={player}>
     <App />
-  </AudioContextProvider>,
+  </PlayerContextProvider>,
   document.getElementById('root')
 );

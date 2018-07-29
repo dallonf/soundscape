@@ -3,7 +3,6 @@ const fs = window.require('fs');
 
 class MusicTrack {
   loaded = false;
-  currentNode = null;
 
   constructor(path, context) {
     this.path = path;
@@ -24,12 +23,10 @@ class MusicTrack {
       }));
   }
 
-  async play() {
+  async createNode() {
     const node = this.context.createBufferSource();
-    this.currentNode = node;
     node.buffer = await this.bufferPromise;
-    node.connect(this.context.destination);
-    node.start();
+    return node;
   }
 }
 
