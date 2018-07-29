@@ -12,7 +12,7 @@ class Player {
 
   async play(musicTrack) {
     this.loading = true;
-    const newSource = await musicTrack.createNode();
+    const { element, node: newSource } = await musicTrack.createNode();
     this.loading = false;
 
     await this.fadeOutAndStop();
@@ -22,16 +22,20 @@ class Player {
     this.currentSound = {
       source: newSource,
       gain: newGainNode,
+      element,
       track: musicTrack,
     };
     newSource.connect(newGainNode);
     newGainNode.connect(this.audioContext.destination);
-    newSource.start(0);
+    element.play();
   }
 
   async stop() {
     if (this.currentSound) {
-      this.currentSound.source.stop();
+      this.currentSound.element.pause();
+      this.currentSound.element.src = '';
+      this.currentSound.gain.disconnect();
+      this.currentSound.source.disconnect();
       this.currentSound = null;
     }
   }
@@ -49,7 +53,11 @@ class Player {
         this.audioContext.currentTime + CROSSFADE_TIME
       );
       await new Promise(resolve => setTimeout(resolve, CROSSFADE_TIME * 1000));
-      fadeOutSound.source.stop();
+      fadeOutSound.element.pause();
+      fadeOutSound.element.src = '';
+      fadeOutSound.gain.disconnect();
+      fadeOutSound.source.disconnect();
+
       if (this.currentSound === fadeOutSound) {
         // Don't set currentSound to null if we've already started a new sound
         this.currentSound = null;

@@ -32,9 +32,9 @@ class MusicTrack {
   }
 
   async createNode() {
-    const node = this.context.createBufferSource();
-    node.buffer = await this.bufferPromise;
-    return node;
+    const element = new Audio(this.filePath);
+    const node = this.context.createMediaElementSource(element);
+    return { element, node };
   }
 }
 
