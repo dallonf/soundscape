@@ -29,7 +29,7 @@ class App extends Component {
         <button onClick={() => this.props.player.play(this.musicTrack2)}>
           Play 2
         </button>
-        <button onClick={() => this.props.player.stop()}>Stop</button>
+        <button onClick={() => this.props.player.fadeOutAndStop()}>Stop</button>
       </div>
     );
   }
