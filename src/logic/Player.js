@@ -1,8 +1,10 @@
+import { observable, decorate } from 'mobx';
 const CROSSFADE_TIME = 1;
 
 class Player {
   loading = false;
   currentSound = null;
+  fadingOutSound = null;
 
   constructor(audioContext) {
     this.audioContext = audioContext;
@@ -37,6 +39,7 @@ class Player {
   async fadeOutAndStop() {
     if (this.currentSound) {
       const fadeOutSound = this.currentSound;
+      this.fadingOutSound = fadeOutSound;
       fadeOutSound.gain.gain.setValueAtTime(
         fadeOutSound.gain.gain.value,
         this.audioContext.currentTime
@@ -51,8 +54,16 @@ class Player {
         // Don't set currentSound to null if we've already started a new sound
         this.currentSound = null;
       }
+      if (this.fadingOutSound === fadeOutSound) {
+        this.fadingOutSound = null;
+      }
     }
   }
 }
+decorate(Player, {
+  loading: observable,
+  currentSound: observable,
+  fadingOutSound: observable,
+});
 
 export default Player;
