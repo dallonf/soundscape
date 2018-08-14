@@ -11,11 +11,18 @@ const App = observer(
       this.state = { next: null };
     }
 
-    handleChooseNext = () => {
-      const result = dialog.showOpenDialog(null, {
-        filters: [{ name: 'Music', extensions: ['mp3', 'wav', 'ogg'] }],
-        properties: ['openFile'],
-      });
+    handleChooseNext = async () => {
+      const resultPromise = new Promise(resolve =>
+        dialog.showOpenDialog(
+          null,
+          {
+            filters: [{ name: 'Music', extensions: ['mp3', 'wav', 'ogg'] }],
+            properties: ['openFile'],
+          },
+          resolve
+        )
+      );
+      const result = await resultPromise;
       if (result && result.length) {
         const track = new MusicTrack(result[0], this.props.player.audioContext);
         this.setState({ next: track });
