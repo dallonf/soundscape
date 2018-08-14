@@ -1,6 +1,4 @@
-import { fromCallback } from 'promise-fns';
 const path = window.require('path');
-const fs = window.require('fs');
 
 class MusicTrack {
   loaded = false;
@@ -19,20 +17,9 @@ class MusicTrack {
     return this.bufferPromise;
   }
 
-  get bufferPromise() {
-    if (this._bufferPromise) return this._bufferPromise;
-    return (this._bufferPromise = fromCallback(cb =>
-      fs.readFile(this.filePath, cb)
-    )
-      .then(buffer => this.context.decodeAudioData(buffer.buffer))
-      .then(buffer => {
-        this.loaded = true;
-        return buffer;
-      }));
-  }
-
   async createNode() {
     const element = new Audio(this.filePath);
+    element.loop = true;
     const node = this.context.createMediaElementSource(element);
     return { element, node };
   }
