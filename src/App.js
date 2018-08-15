@@ -1,42 +1,62 @@
 import React, { Component } from 'react';
 import { observer } from 'mobx-react';
-import MusicTrack from './logic/MusicTrack.js';
+import { selectMusicTrackDialog } from './logic/MusicTrack.js';
 import PlayerContext from './structure/PlayerContext';
-const { dialog } = window.require('electron').remote;
 
 const App = observer(
   class App extends Component {
-    constructor(...args) {
-      super(...args);
-      this.state = { next: null };
-    }
-
     handleChooseNext = async () => {
-      const resultPromise = new Promise(resolve =>
-        dialog.showOpenDialog(
-          null,
-          {
-            filters: [{ name: 'Music', extensions: ['mp3', 'wav', 'ogg'] }],
-            properties: ['openFile'],
-          },
-          resolve
-        )
+      const result = await selectMusicTrackDialog(
+        this.props.player.audioContext
       );
-      const result = await resultPromise;
-      if (result && result.length) {
-        const track = new MusicTrack(result[0], this.props.player.audioContext);
-        this.setState({ next: track });
+      if (result) {
+        this.props.player.nextTrack = result;
+      }
+    };
+
+    handleAddToPalette = async () => {
+      const result = await selectMusicTrackDialog(
+        this.props.player.audioContext
+      );
+      if (result) {
+        this.props.player.palette.push(result);
       }
     };
 
     render() {
-      const { next } = this.state;
+      const { nextTrack, palette } = this.props.player;
       return (
         <div>
+          <h2>Palette</h2>
+          {palette.length ? (
+            <ul>
+              {palette.map((paletteTrack, i) => (
+                <li key={i}>
+                  {paletteTrack.name}
+                  <br />
+                  <button onClick={() => this.props.player.play(paletteTrack)}>
+                    Play
+                  </button>
+                  <button
+                    onClick={() => (this.props.player.nextTrack = paletteTrack)}
+                  >
+                    Set Next
+                  </button>
+                  <button
+                    onClick={() => this.props.player.palette.splice(i, 1)}
+                  >
+                    Remove
+                  </button>
+                </li>
+              ))}
+            </ul>
+          ) : null}
+          <button onClick={this.handleAddToPalette}>Add</button>
+          <h2>Player</h2>
           <button onClick={this.handleChooseNext}>Pick track</button>
-          {next && (
-            <button onClick={() => this.props.player.play(next)}>
-              Play {next.name}
+          {nextTrack && (
+            <button onClick={() => this.props.player.play(nextTrack)}>
+              Play {nextTrack.name}
             </button>
           )}
           <button onClick={() => this.props.player.fadeOutAndStop()}>
