@@ -5,6 +5,7 @@ class Player {
   loading = false;
   currentSound = null;
   fadingOutSound = null;
+  paused = false;
 
   palette = [];
   nextTrack = null;
@@ -91,6 +92,41 @@ class Player {
       this.currentSound.gain.disconnect();
       this.currentSound.source.disconnect();
       this.currentSound = null;
+    }
+  }
+
+  async pause() {
+    if (this.currentSound) {
+      this.paused = true;
+      this.currentSound.gain.gain.setValueAtTime(
+        this.currentSound.gain.gain.value,
+        this.audioContext.currentTime
+      );
+      this.currentSound.gain.gain.linearRampToValueAtTime(
+        0.001,
+        this.audioContext.currentTime + CROSSFADE_TIME
+      );
+      await new Promise(resolve => setTimeout(resolve, CROSSFADE_TIME * 1000));
+      if (this.paused) {
+        // possible race condition: the user may have resumed before the fadeout finished.
+        // In that case, don't actually pause the track.
+        this.currentSound.element.pause();
+      }
+    }
+  }
+
+  async resume() {
+    if (this.currentSound && this.paused) {
+      this.currentSound.element.play();
+      this.paused = false;
+      this.currentSound.gain.gain.setValueAtTime(
+        this.currentSound.gain.gain.value,
+        this.audioContext.currentTime
+      );
+      this.currentSound.gain.gain.linearRampToValueAtTime(
+        1,
+        this.audioContext.currentTime + CROSSFADE_TIME
+      );
     }
   }
 
