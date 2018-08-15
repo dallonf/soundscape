@@ -45,7 +45,8 @@ const App = observer(
           <div>
             {this.props.player.currentSound && (
               <div>
-                Now playing: {this.props.player.currentSound.track.name}
+                Now playing: {this.props.player.currentSound.track.name}<br />
+                {this.props.player._currentSoundProgress}/{this.props.player.currentSound.element.duration}
               </div>
             )}
           </div>

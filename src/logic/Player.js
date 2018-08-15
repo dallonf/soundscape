@@ -1,4 +1,4 @@
-import { observable, decorate } from 'mobx';
+import { observable, decorate, autorun } from 'mobx';
 const CROSSFADE_TIME = 1;
 
 class Player {
@@ -6,8 +6,42 @@ class Player {
   currentSound = null;
   fadingOutSound = null;
 
+  _currentSoundProgress = null;
+
   constructor(audioContext) {
     this.audioContext = audioContext;
+    this.disposalFns = [];
+
+    // keep track of current time of audio
+    this.disposalFns.push(
+      autorun(() => {
+        // debugger;
+        if (this.unsubAudio) {
+          this.unsubAudio();
+        }
+        const element = this.currentSound && this.currentSound.element;
+        if (element) {
+          this._currentSoundProgress = element.currentTime;
+          const onTimeUpdate = () => {
+            this._currentSoundProgress = element.currentTime;
+          };
+          element.addEventListener('timeupdate', onTimeUpdate);
+          this.unsubAudio = () =>
+            element.removeEventListener('timeupdate', onTimeUpdate);
+        } else {
+          this._currentSoundProgress = null;
+        }
+      })
+    );
+  }
+
+  dispose() {
+    for (const fn of this.diposalFns) {
+      fn();
+    }
+    if (this.unsubAudio) {
+      this.unsubAudio();
+    }
   }
 
   async play(musicTrack) {
@@ -72,6 +106,8 @@ decorate(Player, {
   loading: observable,
   currentSound: observable,
   fadingOutSound: observable,
+  _currentSoundProgress: observable,
+  // currentSoundProgress: computed,
 });
 
 export default Player;
