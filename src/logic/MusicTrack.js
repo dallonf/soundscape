@@ -19,8 +19,10 @@ class MusicTrack {
 
   async createNode() {
     const element = new Audio(this.filePath);
+    const loadedPromise = new Promise(resolve => element.addEventListener('loadedmetadata', resolve));
     element.loop = true;
     const node = this.context.createMediaElementSource(element);
+    await loadedPromise;
     return { element, node };
   }
 }

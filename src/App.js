@@ -45,8 +45,20 @@ const App = observer(
           <div>
             {this.props.player.currentSound && (
               <div>
-                Now playing: {this.props.player.currentSound.track.name}<br />
-                {this.props.player._currentSoundProgress}/{this.props.player.currentSound.element.duration}
+                Now playing: {this.props.player.currentSound.track.name}
+                <br />
+                <input
+                  type="range"
+                  max={this.props.player.currentSoundDuration}
+                  value={this.props.player.currentSoundProgress}
+                  onChange={e => {
+                    this.props.player.currentSoundProgress =
+                      e.target.valueAsNumber;
+                  }}
+                />
+                <br />
+                {this.props.player._currentSoundProgress}/
+                {this.props.player.currentSound.element.duration}
               </div>
             )}
           </div>
