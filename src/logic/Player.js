@@ -1,6 +1,8 @@
 import { observable, decorate, autorun, computed } from 'mobx';
 const CROSSFADE_TIME = 1;
 
+// TODO: there's lots of bugs and edge cases around pausing / resuming / stopping / starting
+// need to refactor to have a more sane state machine
 class Player {
   loading = false;
   currentSound = null;
