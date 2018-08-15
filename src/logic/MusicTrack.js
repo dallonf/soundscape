@@ -35,7 +35,7 @@ export async function selectMusicTrackDialog(audioContext) {
       null,
       {
         filters: [{ name: 'Music', extensions: ['mp3', 'wav', 'ogg'] }],
-        properties: ['openFile'],
+        properties: ['openFile', 'treatPackageAsDirectory', 'noResolveAliases'],
       },
       resolve
     )
@@ -46,5 +46,23 @@ export async function selectMusicTrackDialog(audioContext) {
     return track;
   }
 }
+
+export async function selectMultipleMusicTracksDialog(audioContext) {
+  const resultPromise = new Promise(resolve =>
+    dialog.showOpenDialog(
+      null,
+      {
+        filters: [{ name: 'Music', extensions: ['mp3', 'wav', 'ogg'] }],
+        properties: ['openFile', 'treatPackageAsDirectory', 'noResolveAliases', 'multiSelections'],
+      },
+      resolve
+    )
+  );
+  const result = await resultPromise;
+  if (result && result.length) {
+    return result.map(x => new MusicTrack(x, audioContext))
+  }
+}
+
 
 export default MusicTrack;

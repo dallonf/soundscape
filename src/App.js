@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { observer } from 'mobx-react';
-import { selectMusicTrackDialog } from './logic/MusicTrack.js';
+import { selectMusicTrackDialog, selectMultipleMusicTracksDialog } from './logic/MusicTrack.js';
 import PlayerContext from './structure/PlayerContext';
 
 const App = observer(
@@ -15,11 +15,11 @@ const App = observer(
     };
 
     handleAddToPalette = async () => {
-      const result = await selectMusicTrackDialog(
+      const result = await selectMultipleMusicTracksDialog(
         this.props.player.audioContext
       );
-      if (result) {
-        this.props.player.palette.push(result);
+      if (result && result.length) {
+        this.props.player.palette.push(...result);
       }
     };
 
