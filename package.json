@@ -1,5 +1,6 @@
 {
   "name": "soundscape",
+  "productName": "Soundscape",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
@@ -15,10 +16,12 @@
   "scripts": {
     "default": "nps",
     "start": "nps",
-    "test": "nps test"
+    "test": "nps test",
+    "build": "nps build"
   },
   "devDependencies": {
     "electron": "^2.0.5",
+    "electron-packager": "^12.1.1",
     "nps": "^5.9.2",
     "nps-utils": "^1.6.0",
     "wait-on": "^2.1.0"

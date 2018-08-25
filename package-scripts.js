@@ -8,7 +8,10 @@ module.exports = {
         'ELECTRON_START_URL=http://localhost:3000 electron .'
       )}`,
     }),
-    build: 'react-scripts build',
+    build: npsUtils.series(
+      'react-scripts build',
+      'electron-packager . --out build-packages'
+    ),
     test: 'react-scripts test --env=jsdom',
     eject: 'react-scripts eject',
   },
