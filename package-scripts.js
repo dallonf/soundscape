@@ -9,8 +9,9 @@ module.exports = {
       )}`,
     }),
     build: npsUtils.series(
+      npsUtils.rimraf('build build-packages'),
       'react-scripts build',
-      'electron-packager . --out build-packages'
+      'electron-packager . --asar --out build-packages'
     ),
     test: 'react-scripts test --env=jsdom',
     eject: 'react-scripts eject',
