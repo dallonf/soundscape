@@ -9,7 +9,8 @@
     "promise-fns": "^1.0.0",
     "react": "^16.4.1",
     "react-dom": "^16.4.1",
-    "react-scripts": "1.1.4"
+    "react-scripts": "^2.1.1",
+    "typescript": "^3.1.6"
   },
   "homepage": "./",
   "main": "src/electron-main.js",
@@ -20,10 +21,18 @@
     "build": "nps build"
   },
   "devDependencies": {
+    "@types/react": "^16.7.7",
+    "@types/react-dom": "^16.0.10",
     "electron": "^2.0.5",
     "electron-packager": "^12.1.1",
     "nps": "^5.9.2",
     "nps-utils": "^1.6.0",
     "wait-on": "^2.1.0"
-  }
+  },
+  "browserslist": [
+    ">0.2%",
+    "not dead",
+    "not ie <= 11",
+    "not op_mini all"
+  ]
 }

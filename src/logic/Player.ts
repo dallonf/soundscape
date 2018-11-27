@@ -1,16 +1,26 @@
 import { observable, decorate, autorun, computed } from 'mobx';
 const CROSSFADE_TIME = 1;
 
+interface Sound {
+  source: any;
+  gain: any;
+  element: any;
+  track: any;
+}
+
 // TODO: there's lots of bugs and edge cases around pausing / resuming / stopping / starting
 // need to refactor to have a more sane state machine
 class Player {
+  audioContext: any;
+  disposalFns: (() => void)[];
+  unsubAudio: (() => void) | undefined = undefined;
   loading = false;
-  currentSound = null;
-  fadingOutSound = null;
+  currentSound: Sound | null = null;
+  fadingOutSound: Sound | null = null;
   paused = false;
 
   palette = [];
-  nextTrack = null;
+  nextTrack: any = null;
 
   _currentSoundProgress = null;
   get currentSoundProgress() {
@@ -31,7 +41,7 @@ class Player {
     }
   }
 
-  constructor(audioContext) {
+  constructor(audioContext: any) {
     this.audioContext = audioContext;
     this.disposalFns = [];
 
@@ -58,7 +68,7 @@ class Player {
   }
 
   dispose() {
-    for (const fn of this.diposalFns) {
+    for (const fn of this.disposalFns) {
       fn();
     }
     if (this.unsubAudio) {
