@@ -83,7 +83,7 @@ const App = observer(
                 {this.props.player._currentSoundProgress}/
                 {this.props.player.currentSound.element.duration}
                 <br />
-                {this.props.player.paused ? (
+                {/* {this.props.player.paused ? (
                   <button onClick={() => this.props.player.resume()}>
                     Resume
                   </button>
@@ -91,7 +91,7 @@ const App = observer(
                   <button onClick={() => this.props.player.pause()}>
                     Pause
                   </button>
-                )}
+                )} */}
               </div>
             )}
           </div>

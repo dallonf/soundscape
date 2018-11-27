@@ -8,6 +8,11 @@ interface Sound {
   track: any;
 }
 
+type PlayerState =
+  | { type: 'NOT_PLAYING' }
+  | { type: 'PLAYING'; sound: Sound }
+  | { type: 'STOPPING'; sound: Sound; nextSound?: Sound };
+
 // TODO: there's lots of bugs and edge cases around pausing / resuming / stopping / starting
 // need to refactor to have a more sane state machine
 class Player {
@@ -15,9 +20,10 @@ class Player {
   disposalFns: (() => void)[];
   unsubAudio: (() => void) | undefined = undefined;
   loading = false;
-  currentSound: Sound | null = null;
-  fadingOutSound: Sound | null = null;
-  paused = false;
+  // currentSound: Sound | null = null;
+  // fadingOutSound: Sound | null = null;
+  state: PlayerState = { type: 'NOT_PLAYING' };
+  // paused = false;
 
   palette = [];
   nextTrack: any = null;
@@ -27,8 +33,8 @@ class Player {
     return this._currentSoundProgress;
   }
   set currentSoundProgress(value) {
-    const element = this.currentSound && this.currentSound.element;
-    if (element) {
+    if (this.state.type === 'PLAYING') {
+      const element = this.state.sound.element;
       element.currentTime = value;
     }
   }
@@ -78,11 +84,14 @@ class Player {
 
   async play(musicTrack = this.nextTrack) {
     if (!musicTrack) return this.stop();
+
     this.loading = true;
     const { element, node: newSource } = await musicTrack.createNode();
     this.loading = false;
 
-    await this.fadeOutAndStop();
+    if (this.state === 'PLAYING') {
+      await this.fadeOutAndStop();
+    }
 
     const newGainNode = this.audioContext.createGain();
 
@@ -107,40 +116,40 @@ class Player {
     }
   }
 
-  async pause() {
-    if (this.currentSound) {
-      this.paused = true;
-      this.currentSound.gain.gain.setValueAtTime(
-        this.currentSound.gain.gain.value,
-        this.audioContext.currentTime
-      );
-      this.currentSound.gain.gain.linearRampToValueAtTime(
-        0.001,
-        this.audioContext.currentTime + CROSSFADE_TIME
-      );
-      await new Promise(resolve => setTimeout(resolve, CROSSFADE_TIME * 1000));
-      if (this.paused) {
-        // possible race condition: the user may have resumed before the fadeout finished.
-        // In that case, don't actually pause the track.
-        this.currentSound.element.pause();
-      }
-    }
-  }
+  // async pause() {
+  //   if (this.currentSound) {
+  //     this.paused = true;
+  //     this.currentSound.gain.gain.setValueAtTime(
+  //       this.currentSound.gain.gain.value,
+  //       this.audioContext.currentTime
+  //     );
+  //     this.currentSound.gain.gain.linearRampToValueAtTime(
+  //       0.001,
+  //       this.audioContext.currentTime + CROSSFADE_TIME
+  //     );
+  //     await new Promise(resolve => setTimeout(resolve, CROSSFADE_TIME * 1000));
+  //     if (this.paused) {
+  //       // possible race condition: the user may have resumed before the fadeout finished.
+  //       // In that case, don't actually pause the track.
+  //       this.currentSound.element.pause();
+  //     }
+  //   }
+  // }
 
-  async resume() {
-    if (this.currentSound && this.paused) {
-      this.currentSound.element.play();
-      this.paused = false;
-      this.currentSound.gain.gain.setValueAtTime(
-        this.currentSound.gain.gain.value,
-        this.audioContext.currentTime
-      );
-      this.currentSound.gain.gain.linearRampToValueAtTime(
-        1,
-        this.audioContext.currentTime + CROSSFADE_TIME
-      );
-    }
-  }
+  // async resume() {
+  //   if (this.currentSound && this.paused) {
+  //     this.currentSound.element.play();
+  //     this.paused = false;
+  //     this.currentSound.gain.gain.setValueAtTime(
+  //       this.currentSound.gain.gain.value,
+  //       this.audioContext.currentTime
+  //     );
+  //     this.currentSound.gain.gain.linearRampToValueAtTime(
+  //       1,
+  //       this.audioContext.currentTime + CROSSFADE_TIME
+  //     );
+  //   }
+  // }
 
   async fadeOutAndStop() {
     if (this.currentSound) {
