@@ -16,11 +16,12 @@ type PlayerState =
       type: 'STOPPING';
       sound: Sound;
       nextTrack?: MusicTrack;
-      timeout: NodeJS.Timeout;
+      fadeOutTimeout: NodeJS.Timeout;
     }
   | { type: 'PAUSED'; sound: Sound }
-  | { type: 'PAUSING'; sound: Sound; timeout: NodeJS.Timeout };
+  | { type: 'PAUSING'; sound: Sound; fadeOutTimeout: NodeJS.Timeout };
 
+// TODO: state transitions probably need to be more automated to be less error-prone
 class Player {
   audioContext: any;
   disposalFns: (() => void)[];
@@ -110,7 +111,10 @@ class Player {
     const { element, node: newSource } = await musicTrack.createNode();
     this.loading = false;
 
-    if (this.state.type === 'NOT_PLAYING') {
+    if (this.state.type === 'NOT_PLAYING' || this.state.type === 'PAUSED') {
+      if (this.state.type === 'PAUSED') {
+        this.stop();
+      }
       const newGainNode = this.audioContext.createGain();
       const sound: Sound = {
         source: newSource,
@@ -126,7 +130,7 @@ class Player {
         type: 'PLAYING',
         sound,
       };
-    } else if (this.state.type === 'PLAYING') {
+    } else if (this.state.type === 'PLAYING' || this.state.type === 'PAUSING') {
       this.fadeOutAndStop({ nextTrack: musicTrack });
     } else if (this.state.type === 'STOPPING') {
       this.state = { ...this.state, nextTrack: musicTrack };
@@ -134,8 +138,15 @@ class Player {
   }
 
   stop() {
-    if (this.state.type === 'PLAYING') {
+    if (
+      this.state.type === 'PLAYING' ||
+      this.state.type === 'PAUSED' ||
+      this.state.type === 'PAUSING'
+    ) {
       const sound = this.state.sound;
+      if (this.state.type === 'PAUSING') {
+        clearTimeout(this.state.fadeOutTimeout);
+      }
       sound.element.pause();
       sound.element.src = '';
       sound.gain.disconnect();
@@ -155,31 +166,18 @@ class Player {
         0.001,
         this.audioContext.currentTime + CROSSFADE_TIME
       );
-      const timeout = setTimeout(
-        this.handlePausingTimeout,
+      const fadeOutTimeout = setTimeout(
+        this.handleFadeOutTimeout,
         CROSSFADE_TIME * 1000
       );
-      this.state = { type: 'PAUSING', sound, timeout };
+      this.state = { type: 'PAUSING', sound, fadeOutTimeout };
     }
   }
-
-  handlePausingTimeout = () => {
-    if (this.state.type !== 'PAUSING') {
-      throw new Error(
-        `Catastrophic state desync; expected state to be "PAUSING" after pausing timeout but it was "${
-          (this.state as any).type
-        }". Did you forget to clear the timeout before changing state?`
-      );
-    }
-    const sound = this.state.sound;
-    sound.element.pause();
-    this.state = { type: 'PAUSED', sound };
-  };
 
   async resume() {
     if (this.state.type === 'PAUSING' || this.state.type === 'PAUSED') {
       if (this.state.type === 'PAUSING') {
-        clearTimeout(this.state.timeout);
+        clearTimeout(this.state.fadeOutTimeout);
       }
 
       const sound = this.state.sound;
@@ -207,41 +205,55 @@ class Player {
         0.001,
         this.audioContext.currentTime + CROSSFADE_TIME
       );
-      const timeout = setTimeout(
-        this.handleStoppingTimeout,
+      const fadeOutTimeout = setTimeout(
+        this.handleFadeOutTimeout,
         CROSSFADE_TIME * 1000
       );
       this.state = {
         type: 'STOPPING',
         sound: this.state.sound,
         nextTrack,
-        timeout,
+        fadeOutTimeout,
       };
     } else if (this.state.type === 'STOPPING') {
       this.state = { ...this.state, nextTrack };
+    } else if (this.state.type === 'PAUSED') {
+      return this.stop();
+    } else if (this.state.type === 'PAUSING') {
+      this.state = {
+        type: 'STOPPING',
+        sound: this.state.sound,
+        fadeOutTimeout: this.state.fadeOutTimeout,
+        nextTrack,
+      };
     } else if (this.state.type === 'NOT_PLAYING') {
       // no-op, nothing to stop
     }
   }
 
-  handleStoppingTimeout = () => {
-    if (this.state.type !== 'STOPPING') {
+  handleFadeOutTimeout = () => {
+    if (this.state.type === 'STOPPING') {
+      const nextTrack = this.state.nextTrack;
+      const fadeOutSound = this.state.sound;
+      fadeOutSound.element.pause();
+      fadeOutSound.element.src = '';
+      fadeOutSound.gain.disconnect();
+      fadeOutSound.source.disconnect();
+      this.state = { type: 'NOT_PLAYING' };
+
+      if (nextTrack) {
+        this.play(nextTrack);
+      }
+    } else if (this.state.type === 'PAUSING') {
+      const sound = this.state.sound;
+      sound.element.pause();
+      this.state = { type: 'PAUSED', sound };
+    } else {
       throw new Error(
-        `Catastrophic state desync; expected state to be "STOPPING" after stopping timeout but it was "${
+        `Catastrophic state desync; expected state to be "STOPPING" or "PAUSING" after fadeout timeout but it was "${
           (this.state as any).type
         }". Did you forget to clear the timeout before changing state?`
       );
-    }
-    const nextTrack = this.state.nextTrack;
-    const fadeOutSound = this.state.sound;
-    fadeOutSound.element.pause();
-    fadeOutSound.element.src = '';
-    fadeOutSound.gain.disconnect();
-    fadeOutSound.source.disconnect();
-    this.state = { type: 'NOT_PLAYING' };
-
-    if (nextTrack) {
-      this.play(nextTrack);
     }
   };
 }
