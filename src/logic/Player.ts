@@ -121,15 +121,13 @@ class Player {
         sound,
       };
     } else if (this.state.type === 'PLAYING') {
-      return this.fadeOutAndStop({ nextTrack: musicTrack });
-    } else {
-      throw new Error(
-        `not sure how to handle this state in play() yet! ${this.state.type}`
-      );
+      this.fadeOutAndStop({ nextTrack: musicTrack });
+    } else if (this.state.type === 'STOPPING') {
+      this.state = { ...this.state, nextTrack: musicTrack };
     }
   }
 
-  async stop() {
+  stop() {
     if (this.state.type === 'PLAYING') {
       const sound = this.state.sound;
       sound.element.pause();
@@ -188,31 +186,31 @@ class Player {
         this.audioContext.currentTime + CROSSFADE_TIME
       );
       await new Promise(resolve => setTimeout(resolve, CROSSFADE_TIME * 1000));
-      fadeOutSound.element.pause();
-      fadeOutSound.element.src = '';
-      fadeOutSound.gain.disconnect();
-      fadeOutSound.source.disconnect();
-
+      // TODO: flow analysis seems to suggest that `this.state.type` will always equal `STOPPING` here; I'm skeptical and will
+      // try to repro and report to TS
       if (this.state.type !== 'STOPPING') {
         throw new Error(
           `Catastrophic state desync; expected state to be "STOPPING" after fadeOutAndStop() but it was "${
-            // TODO: flow analysis seems to suggest that this block is impossible; I'm skeptical and will
-            // try to repro and report to TS
             (this.state as any).type
           }"`
         );
       }
+      // the nextTrack could have potentially changed since the fadeout started
+      const actualNextTrack = this.state.nextTrack;
 
+      fadeOutSound.element.pause();
+      fadeOutSound.element.src = '';
+      fadeOutSound.gain.disconnect();
+      fadeOutSound.source.disconnect();
       this.state = { type: 'NOT_PLAYING' };
-      if (nextTrack) {
-        this.play(nextTrack);
+
+      if (actualNextTrack) {
+        this.play(actualNextTrack);
       }
-    } else {
-      throw new Error(
-        `not sure how to handle this state in fadeOutAndStop() yet! ${
-          this.state.type
-        }`
-      );
+    } else if (this.state.type === 'STOPPING') {
+      this.state = { ...this.state, nextTrack };
+    } else if (this.state.type === 'NOT_PLAYING') {
+      // no-op, nothing to stop
     }
   }
 }
