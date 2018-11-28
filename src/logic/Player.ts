@@ -1,17 +1,18 @@
 import { observable, decorate, autorun, computed } from 'mobx';
+import MusicTrack from './MusicTrack';
 const CROSSFADE_TIME = 1;
 
 interface Sound {
   source: any;
   gain: any;
-  element: any;
-  track: any;
+  element: HTMLAudioElement;
+  track: MusicTrack;
 }
 
 type PlayerState =
   | { type: 'NOT_PLAYING' }
   | { type: 'PLAYING'; sound: Sound }
-  | { type: 'STOPPING'; sound: Sound; nextSound?: Sound };
+  | { type: 'STOPPING'; sound: Sound; nextTrack?: MusicTrack };
 
 // TODO: there's lots of bugs and edge cases around pausing / resuming / stopping / starting
 // need to refactor to have a more sane state machine
@@ -26,20 +27,31 @@ class Player {
   // paused = false;
 
   palette = [];
-  nextTrack: any = null;
+  nextTrack: MusicTrack | null = null;
 
-  _currentSoundProgress = null;
+  _currentSoundProgress: number | null = null;
   get currentSoundProgress() {
     return this._currentSoundProgress;
   }
   set currentSoundProgress(value) {
-    if (this.state.type === 'PLAYING') {
+    if (this.state.type === 'PLAYING' && value) {
       const element = this.state.sound.element;
       element.currentTime = value;
     }
   }
+  get currentSound_renameLater() {
+    if (this.state.type === 'PLAYING') {
+      return this.state.sound;
+    } else if (this.state.type === 'STOPPING') {
+      return this.state.sound;
+    } else {
+      return null;
+    }
+  }
   get currentSoundDuration() {
-    const element = this.currentSound && this.currentSound.element;
+    const sound = this.currentSound_renameLater;
+    const element = sound && sound.element;
+
     if (element) {
       return element.duration;
     } else {
@@ -57,7 +69,10 @@ class Player {
         if (this.unsubAudio) {
           this.unsubAudio();
         }
-        const element = this.currentSound && this.currentSound.element;
+
+        const element =
+          this.currentSound_renameLater &&
+          this.currentSound_renameLater.element;
         if (element) {
           this._currentSoundProgress = element.currentTime;
           const onTimeUpdate = () => {
@@ -89,30 +104,39 @@ class Player {
     const { element, node: newSource } = await musicTrack.createNode();
     this.loading = false;
 
-    if (this.state === 'PLAYING') {
-      await this.fadeOutAndStop();
+    if (this.state.type === 'NOT_PLAYING') {
+      const newGainNode = this.audioContext.createGain();
+      const sound: Sound = {
+        source: newSource,
+        gain: newGainNode,
+        element,
+        track: musicTrack,
+      };
+
+      newSource.connect(newGainNode);
+      newGainNode.connect(this.audioContext.destination);
+      element.play();
+      this.state = {
+        type: 'PLAYING',
+        sound,
+      };
+    } else if (this.state.type === 'PLAYING') {
+      return this.fadeOutAndStop({ nextTrack: musicTrack });
+    } else {
+      throw new Error(
+        `not sure how to handle this state in play() yet! ${this.state.type}`
+      );
     }
-
-    const newGainNode = this.audioContext.createGain();
-
-    this.currentSound = {
-      source: newSource,
-      gain: newGainNode,
-      element,
-      track: musicTrack,
-    };
-    newSource.connect(newGainNode);
-    newGainNode.connect(this.audioContext.destination);
-    element.play();
   }
 
   async stop() {
-    if (this.currentSound) {
-      this.currentSound.element.pause();
-      this.currentSound.element.src = '';
-      this.currentSound.gain.disconnect();
-      this.currentSound.source.disconnect();
-      this.currentSound = null;
+    if (this.state.type === 'PLAYING') {
+      const sound = this.state.sound;
+      sound.element.pause();
+      sound.element.src = '';
+      sound.gain.disconnect();
+      sound.source.disconnect();
+      this.state = { type: 'NOT_PLAYING' };
     }
   }
 
@@ -151,10 +175,10 @@ class Player {
   //   }
   // }
 
-  async fadeOutAndStop() {
-    if (this.currentSound) {
-      const fadeOutSound = this.currentSound;
-      this.fadingOutSound = fadeOutSound;
+  async fadeOutAndStop({ nextTrack }: { nextTrack?: MusicTrack } = {}) {
+    if (this.state.type === 'PLAYING') {
+      this.state = { type: 'STOPPING', sound: this.state.sound, nextTrack };
+      const fadeOutSound = this.state.sound;
       fadeOutSound.gain.gain.setValueAtTime(
         fadeOutSound.gain.gain.value,
         this.audioContext.currentTime
@@ -169,24 +193,36 @@ class Player {
       fadeOutSound.gain.disconnect();
       fadeOutSound.source.disconnect();
 
-      if (this.currentSound === fadeOutSound) {
-        // Don't set currentSound to null if we've already started a new sound
-        this.currentSound = null;
+      if (this.state.type !== 'STOPPING') {
+        throw new Error(
+          `Catastrophic state desync; expected state to be "STOPPING" after fadeOutAndStop() but it was "${
+            // TODO: flow analysis seems to suggest that this block is impossible; I'm skeptical and will
+            // try to repro and report to TS
+            (this.state as any).type
+          }"`
+        );
       }
-      if (this.fadingOutSound === fadeOutSound) {
-        this.fadingOutSound = null;
+
+      this.state = { type: 'NOT_PLAYING' };
+      if (nextTrack) {
+        this.play(nextTrack);
       }
+    } else {
+      throw new Error(
+        `not sure how to handle this state in fadeOutAndStop() yet! ${
+          this.state.type
+        }`
+      );
     }
   }
 }
 decorate(Player, {
-  loading: observable,
-  currentSound: observable,
-  fadingOutSound: observable,
+  state: observable,
   palette: observable,
   nextTrack: observable,
   _currentSoundProgress: observable,
   currentSoundProgress: computed,
+  currentSound_renameLater: computed,
   currentSoundDuration: computed,
 });
 
