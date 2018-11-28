@@ -5,9 +5,14 @@ import {
   selectMultipleMusicTracksDialog,
 } from './logic/MusicTrack.js';
 import PlayerContext from './structure/PlayerContext';
+import Player from './logic/Player.js';
+
+interface IProps {
+  player: Player;
+}
 
 const App = observer(
-  class App extends Component {
+  class App extends Component<IProps> {
     handleChooseNext = async () => {
       const result = await selectMusicTrackDialog(
         this.props.player.audioContext
@@ -66,14 +71,23 @@ const App = observer(
             Stop
           </button>
           <div>
-            {this.props.player.currentSound && (
+            {this.props.player.currentSound_renameLater && (
               <div>
-                Now playing: {this.props.player.currentSound.track.name}
+                Now playing:{' '}
+                {this.props.player.currentSound_renameLater.track.name}
                 <br />
                 <input
                   type="range"
-                  max={this.props.player.currentSoundDuration}
-                  value={this.props.player.currentSoundProgress}
+                  max={
+                    this.props.player.currentSoundDuration == null
+                      ? undefined
+                      : this.props.player.currentSoundDuration
+                  }
+                  value={
+                    this.props.player.currentSoundProgress == null
+                      ? undefined
+                      : this.props.player.currentSoundProgress
+                  }
                   onChange={e => {
                     this.props.player.currentSoundProgress =
                       e.target.valueAsNumber;
@@ -81,7 +95,7 @@ const App = observer(
                 />
                 <br />
                 {this.props.player._currentSoundProgress}/
-                {this.props.player.currentSound.element.duration}
+                {this.props.player.currentSound_renameLater.element.duration}
                 <br />
                 {/* {this.props.player.paused ? (
                   <button onClick={() => this.props.player.resume()}>
@@ -102,7 +116,8 @@ const App = observer(
 );
 
 const AppController = () => (
-  <PlayerContext>{player => <App player={player} />}</PlayerContext>
+  // TODO: fix type for PlayerContext
+  <PlayerContext>{player => <App player={player as any} />}</PlayerContext>
 );
 
 export default AppController;

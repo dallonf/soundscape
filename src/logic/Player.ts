@@ -26,7 +26,7 @@ class Player {
   state: PlayerState = { type: 'NOT_PLAYING' };
   // paused = false;
 
-  palette = [];
+  palette: MusicTrack[] = [];
   nextTrack: MusicTrack | null = null;
 
   _currentSoundProgress: number | null = null;
