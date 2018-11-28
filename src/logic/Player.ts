@@ -17,10 +17,10 @@ type PlayerState =
       sound: Sound;
       nextTrack?: MusicTrack;
       timeout: NodeJS.Timeout;
-    };
+    }
+  | { type: 'PAUSED'; sound: Sound }
+  | { type: 'PAUSING'; sound: Sound; timeout: NodeJS.Timeout };
 
-// TODO: there's lots of bugs and edge cases around pausing / resuming / stopping / starting
-// need to refactor to have a more sane state machine
 class Player {
   audioContext: any;
   disposalFns: (() => void)[];
@@ -44,17 +44,20 @@ class Player {
       element.currentTime = value;
     }
   }
-  get currentSound_renameLater() {
-    if (this.state.type === 'PLAYING') {
-      return this.state.sound;
-    } else if (this.state.type === 'STOPPING') {
+  get currentSound() {
+    if (
+      this.state.type === 'PLAYING' ||
+      this.state.type === 'STOPPING' ||
+      this.state.type === 'PAUSED' ||
+      this.state.type === 'PAUSING'
+    ) {
       return this.state.sound;
     } else {
       return null;
     }
   }
   get currentSoundDuration() {
-    const sound = this.currentSound_renameLater;
+    const sound = this.currentSound;
     const element = sound && sound.element;
 
     if (element) {
@@ -75,9 +78,7 @@ class Player {
           this.unsubAudio();
         }
 
-        const element =
-          this.currentSound_renameLater &&
-          this.currentSound_renameLater.element;
+        const element = this.currentSound && this.currentSound.element;
         if (element) {
           this._currentSoundProgress = element.currentTime;
           const onTimeUpdate = () => {
@@ -143,40 +144,57 @@ class Player {
     }
   }
 
-  // async pause() {
-  //   if (this.currentSound) {
-  //     this.paused = true;
-  //     this.currentSound.gain.gain.setValueAtTime(
-  //       this.currentSound.gain.gain.value,
-  //       this.audioContext.currentTime
-  //     );
-  //     this.currentSound.gain.gain.linearRampToValueAtTime(
-  //       0.001,
-  //       this.audioContext.currentTime + CROSSFADE_TIME
-  //     );
-  //     await new Promise(resolve => setTimeout(resolve, CROSSFADE_TIME * 1000));
-  //     if (this.paused) {
-  //       // possible race condition: the user may have resumed before the fadeout finished.
-  //       // In that case, don't actually pause the track.
-  //       this.currentSound.element.pause();
-  //     }
-  //   }
-  // }
+  pause() {
+    if (this.state.type === 'PLAYING') {
+      const sound = this.state.sound;
+      sound.gain.gain.setValueAtTime(
+        sound.gain.gain.value,
+        this.audioContext.currentTime
+      );
+      sound.gain.gain.linearRampToValueAtTime(
+        0.001,
+        this.audioContext.currentTime + CROSSFADE_TIME
+      );
+      const timeout = setTimeout(
+        this.handlePausingTimeout,
+        CROSSFADE_TIME * 1000
+      );
+      this.state = { type: 'PAUSING', sound, timeout };
+    }
+  }
 
-  // async resume() {
-  //   if (this.currentSound && this.paused) {
-  //     this.currentSound.element.play();
-  //     this.paused = false;
-  //     this.currentSound.gain.gain.setValueAtTime(
-  //       this.currentSound.gain.gain.value,
-  //       this.audioContext.currentTime
-  //     );
-  //     this.currentSound.gain.gain.linearRampToValueAtTime(
-  //       1,
-  //       this.audioContext.currentTime + CROSSFADE_TIME
-  //     );
-  //   }
-  // }
+  handlePausingTimeout = () => {
+    if (this.state.type !== 'PAUSING') {
+      throw new Error(
+        `Catastrophic state desync; expected state to be "PAUSING" after pausing timeout but it was "${
+          (this.state as any).type
+        }". Did you forget to clear the timeout before changing state?`
+      );
+    }
+    const sound = this.state.sound;
+    sound.element.pause();
+    this.state = { type: 'PAUSED', sound };
+  };
+
+  async resume() {
+    if (this.state.type === 'PAUSING' || this.state.type === 'PAUSED') {
+      if (this.state.type === 'PAUSING') {
+        clearTimeout(this.state.timeout);
+      }
+
+      const sound = this.state.sound;
+      sound.element.play();
+      sound.gain.gain.setValueAtTime(
+        sound.gain.gain.value,
+        this.audioContext.currentTime
+      );
+      sound.gain.gain.linearRampToValueAtTime(
+        1,
+        this.audioContext.currentTime + CROSSFADE_TIME
+      );
+      this.state = { type: 'PLAYING', sound };
+    }
+  }
 
   fadeOutAndStop({ nextTrack }: { nextTrack?: MusicTrack } = {}) {
     if (this.state.type === 'PLAYING') {
@@ -233,7 +251,7 @@ decorate(Player, {
   nextTrack: observable,
   _currentSoundProgress: observable,
   currentSoundProgress: computed,
-  currentSound_renameLater: computed,
+  currentSound: computed,
   currentSoundDuration: computed,
 });
 

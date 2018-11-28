@@ -32,7 +32,8 @@ const App = observer(
     };
 
     render() {
-      const { nextTrack, palette } = this.props.player;
+      const { nextTrack, palette, state } = this.props.player;
+      const paused = state.type === 'PAUSED' || state.type === 'PAUSING';
       return (
         <div>
           <h2>Palette</h2>
@@ -71,10 +72,9 @@ const App = observer(
             Stop
           </button>
           <div>
-            {this.props.player.currentSound_renameLater && (
+            {this.props.player.currentSound && (
               <div>
-                Now playing:{' '}
-                {this.props.player.currentSound_renameLater.track.name}
+                Now playing: {this.props.player.currentSound.track.name}
                 <br />
                 <input
                   type="range"
@@ -95,9 +95,9 @@ const App = observer(
                 />
                 <br />
                 {this.props.player._currentSoundProgress}/
-                {this.props.player.currentSound_renameLater.element.duration}
+                {this.props.player.currentSound.element.duration}
                 <br />
-                {/* {this.props.player.paused ? (
+                {paused ? (
                   <button onClick={() => this.props.player.resume()}>
                     Resume
                   </button>
@@ -105,7 +105,7 @@ const App = observer(
                   <button onClick={() => this.props.player.pause()}>
                     Pause
                   </button>
-                )} */}
+                )}
               </div>
             )}
           </div>
