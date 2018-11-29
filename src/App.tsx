@@ -4,7 +4,7 @@ import {
   selectMusicTrackDialog,
   selectMultipleMusicTracksDialog,
 } from './logic/MusicTrack';
-import PlayerContext from './structure/PlayerContext';
+import AppStateContext from './structure/AppStateContext';
 import Player from './logic/Player';
 
 interface IProps {
@@ -116,8 +116,12 @@ const App = observer(
 );
 
 const AppController = () => (
-  // TODO: fix type for PlayerContext
-  <PlayerContext>{player => <App player={player as any} />}</PlayerContext>
+  <AppStateContext>
+    {appState => {
+      if (!appState) throw new Error('AppStateContext is required');
+      return <App player={appState.player} />;
+    }}
+  </AppStateContext>
 );
 
 export default AppController;

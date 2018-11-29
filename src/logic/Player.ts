@@ -3,8 +3,8 @@ import MusicTrack from './MusicTrack';
 const CROSSFADE_TIME = 1;
 
 interface Sound {
-  source: any;
-  gain: any;
+  source: MediaElementAudioSourceNode;
+  gain: GainNode;
   element: HTMLAudioElement;
   track: MusicTrack;
 }
@@ -23,7 +23,7 @@ type PlayerState =
 
 // TODO: state transitions probably need to be more automated to be less error-prone
 class Player {
-  audioContext: any;
+  audioContext: AudioContext;
   disposalFns: (() => void)[];
   unsubAudio: (() => void) | undefined = undefined;
   loading = false;
@@ -65,7 +65,7 @@ class Player {
     }
   }
 
-  constructor(audioContext: any) {
+  constructor(audioContext: AudioContext) {
     this.audioContext = audioContext;
     this.disposalFns = [];
 
@@ -248,7 +248,7 @@ class Player {
     } else {
       throw new Error(
         `Catastrophic state desync; expected state to be "STOPPING" or "PAUSING" after fadeout timeout but it was "${
-          (this.state as any).type
+          this.state.type
         }". Did you forget to clear the timeout before changing state?`
       );
     }
