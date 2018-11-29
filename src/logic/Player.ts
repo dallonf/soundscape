@@ -29,9 +29,6 @@ class Player {
   loading = false;
   state: PlayerState = { type: 'NOT_PLAYING' };
 
-  palette: MusicTrack[] = [];
-  nextTrack: MusicTrack | null = null;
-
   _currentSoundProgress: number | null = null;
   get currentSoundProgress() {
     return this._currentSoundProgress;
@@ -101,9 +98,7 @@ class Player {
     }
   }
 
-  async play(musicTrack = this.nextTrack) {
-    if (!musicTrack) return this.stop();
-
+  async play(musicTrack: MusicTrack) {
     this.loading = true;
     const { element, node: newSource } = await musicTrack.createNode();
     this.loading = false;
@@ -256,8 +251,6 @@ class Player {
 }
 decorate(Player, {
   state: observable,
-  palette: observable,
-  nextTrack: observable,
   _currentSoundProgress: observable,
   currentSoundProgress: computed,
   currentSound: computed,
