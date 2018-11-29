@@ -1,9 +1,15 @@
-const path = window.require('path');
-const { dialog } = window.require('electron').remote;
+import * as pathModule from 'path';
+import * as electronModule from 'electron';
+
+const path = window.require('path') as typeof pathModule;
+const { dialog } = (window.require('electron') as typeof electronModule).remote;
+
 class MusicTrack {
   loaded = false;
+  filePath: string;
+  context: AudioContext;
 
-  constructor(filePath, context) {
+  constructor(filePath: string, context: AudioContext) {
     this.filePath = filePath;
     this.context = context;
   }
@@ -11,10 +17,6 @@ class MusicTrack {
   get name() {
     const ext = path.extname(this.filePath);
     return path.basename(this.filePath, ext);
-  }
-
-  preload() {
-    return this.bufferPromise;
   }
 
   async createNode() {
@@ -29,10 +31,9 @@ class MusicTrack {
   }
 }
 
-export async function selectMusicTrackDialog(audioContext) {
-  const resultPromise = new Promise(resolve =>
+export async function selectMusicTrackDialog(audioContext: AudioContext) {
+  const resultPromise = new Promise<string[] | undefined>(resolve =>
     dialog.showOpenDialog(
-      null,
       {
         filters: [{ name: 'Music', extensions: ['mp3', 'wav', 'ogg'] }],
         properties: ['openFile', 'treatPackageAsDirectory', 'noResolveAliases'],
@@ -47,22 +48,27 @@ export async function selectMusicTrackDialog(audioContext) {
   }
 }
 
-export async function selectMultipleMusicTracksDialog(audioContext) {
-  const resultPromise = new Promise(resolve =>
+export async function selectMultipleMusicTracksDialog(
+  audioContext: AudioContext
+) {
+  const resultPromise = new Promise<string[] | undefined>(resolve =>
     dialog.showOpenDialog(
-      null,
       {
         filters: [{ name: 'Music', extensions: ['mp3', 'wav', 'ogg'] }],
-        properties: ['openFile', 'treatPackageAsDirectory', 'noResolveAliases', 'multiSelections'],
+        properties: [
+          'openFile',
+          'treatPackageAsDirectory',
+          'noResolveAliases',
+          'multiSelections',
+        ],
       },
       resolve
     )
   );
   const result = await resultPromise;
   if (result && result.length) {
-    return result.map(x => new MusicTrack(x, audioContext))
+    return result.map(x => new MusicTrack(x, audioContext));
   }
 }
-
 
 export default MusicTrack;

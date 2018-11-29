@@ -27,10 +27,7 @@ class Player {
   disposalFns: (() => void)[];
   unsubAudio: (() => void) | undefined = undefined;
   loading = false;
-  // currentSound: Sound | null = null;
-  // fadingOutSound: Sound | null = null;
   state: PlayerState = { type: 'NOT_PLAYING' };
-  // paused = false;
 
   palette: MusicTrack[] = [];
   nextTrack: MusicTrack | null = null;

@@ -3,9 +3,9 @@ import { observer } from 'mobx-react';
 import {
   selectMusicTrackDialog,
   selectMultipleMusicTracksDialog,
-} from './logic/MusicTrack.js';
+} from './logic/MusicTrack';
 import PlayerContext from './structure/PlayerContext';
-import Player from './logic/Player.js';
+import Player from './logic/Player';
 
 interface IProps {
   player: Player;
