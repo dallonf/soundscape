@@ -23,38 +23,39 @@ const App = observer(
       }
     };
 
-    // handleAddToPalette = async () => {
-    //   const result = await selectMultipleMusicTracksDialog(
-    //     this.props.appState.audioContext
-    //   );
-    //   if (result && result.length) {
-    //     this.props.player.palette.push(...result);
-    //   }
-    // };
+    handleAddToPalette = async () => {
+      const result = await selectMultipleMusicTracksDialog(
+        this.props.appState.audioContext
+      );
+      if (result && result.length) {
+        this.props.appState.palette.tracks.push(...result);
+      }
+    };
 
     render() {
-      const { nextTrack, player } = this.props.appState;
+      const { appState } = this.props;
+      const { nextTrack, player, palette } = appState;
       const paused =
         player.state.type === 'PAUSED' || player.state.type === 'PAUSING';
       return (
         <div>
           <h2>Palette</h2>
-          {/* {palette.length ? (
+          {palette.tracks.length ? (
             <ul>
-              {palette.map((paletteTrack, i) => (
+              {palette.tracks.map((paletteTrack, i) => (
                 <li key={i}>
                   {paletteTrack.name}
                   <br />
-                  <button onClick={() => this.props.player.play(paletteTrack)}>
+                  <button onClick={() => player.play(paletteTrack)}>
                     Play
                   </button>
                   <button
-                    onClick={() => (this.props.player.nextTrack = paletteTrack)}
+                    onClick={() => (appState.nextTrack = paletteTrack)}
                   >
                     Set Next
                   </button>
                   <button
-                    onClick={() => this.props.player.palette.splice(i, 1)}
+                    onClick={() => palette.tracks.splice(i, 1)}
                   >
                     Remove
                   </button>
@@ -62,7 +63,7 @@ const App = observer(
               ))}
             </ul>
           ) : null}
-          <button onClick={this.handleAddToPalette}>Add</button> */}
+          <button onClick={this.handleAddToPalette}>Add</button>
           <h2>Player</h2>
           <button onClick={this.handleChooseNext}>Pick track</button>
           {nextTrack && (
