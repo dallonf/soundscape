@@ -12,7 +12,12 @@ export default class AppState {
   constructor(audioContext: AudioContext) {
     this.audioContext = audioContext;
     this.player = new Player(audioContext);
-    this.palette = new Palette();
+    this.palette = new Palette(audioContext);
+  }
+
+  dispose() {
+    this.player.dispose();
+    this.palette.dispose();
   }
 }
 decorate(AppState, {
