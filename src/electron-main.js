@@ -15,9 +15,10 @@ function createWindow() {
   mainWindow = new BrowserWindow({
     width: 800,
     height: 600,
-    ...(process.env.ELECTRON_START_URL
-      ? { webPreferences: { webSecurity: false } }
-      : {}),
+    webPreferences: {
+      nodeIntegration: true,
+      ...(process.env.ELECTRON_START_URL ? { webSecurity: false } : {}),
+    },
   });
 
   // and load the index.html of the app.
