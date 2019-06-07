@@ -23,8 +23,8 @@
   "devDependencies": {
     "@types/react": "^16.7.7",
     "@types/react-dom": "^16.0.10",
-    "electron": "^2.0.5",
-    "electron-packager": "^12.1.1",
+    "electron": "^5.0.2",
+    "electron-packager": "^13.1.1",
     "nps": "^5.9.2",
     "nps-utils": "^1.6.0",
     "wait-on": "^2.1.0"
