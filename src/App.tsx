@@ -4,7 +4,6 @@ import {
   selectMusicTrackDialog,
   selectMultipleMusicTracksDialog,
 } from './logic/MusicTrack';
-import Player from './logic/Player';
 import AppState from './logic/AppState';
 import AppStateContext from './structure/AppStateContext';
 
