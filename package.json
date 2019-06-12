@@ -4,11 +4,14 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@material-ui/core": "^4.1.0",
     "mobx": "^5.10.1",
     "mobx-react": "^6.0.3",
     "promise-fns": "^1.0.0",
     "react": "^16.4.1",
     "react-dom": "^16.4.1",
+    "styled-components": "^4.3.1",
+    "typeface-roboto": "^0.0.54",
     "typescript": "^3.1.6"
   },
   "homepage": "./",
@@ -22,6 +25,7 @@
   "devDependencies": {
     "@types/react": "^16.7.7",
     "@types/react-dom": "^16.0.10",
+    "@types/styled-components": "^4.1.16",
     "electron": "^5.0.3",
     "electron-packager": "^13.1.1",
     "nps": "^5.9.2",
