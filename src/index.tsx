@@ -8,7 +8,7 @@ import { useTheme, ThemeProvider as MuiThemeProvider } from '@material-ui/styles
 import './index.css';
 import Layout from './ui/Layout';
 import AppState from './logic/AppState';
-import { Provider as AppStateContextProvider } from './structure/AppStateContext';
+import AppStateContext from './structure/AppStateContext';
 
 const theme = createMuiTheme();
 
@@ -31,12 +31,12 @@ const MuiToStyledComponentsThemeProvider = ({
 };
 
 ReactDOM.render(
-  <AppStateContextProvider value={appState}>
+  <AppStateContext.Provider value={appState}>
     <MuiThemeProvider theme={theme}>
       <MuiToStyledComponentsThemeProvider>
         <Layout />
       </MuiToStyledComponentsThemeProvider>
     </MuiThemeProvider>
-  </AppStateContextProvider>,
+  </AppStateContext.Provider>,
   document.getElementById('root')
 );

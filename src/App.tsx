@@ -111,12 +111,12 @@ const App = observer(
 );
 
 const AppController = () => (
-  <AppStateContext>
+  <AppStateContext.Consumer>
     {appState => {
       if (!appState) throw new Error('AppStateContext is required');
       return <App appState={appState} />;
     }}
-  </AppStateContext>
+  </AppStateContext.Consumer>
 );
 
 export default AppController;
