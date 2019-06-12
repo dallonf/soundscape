@@ -1,6 +1,7 @@
 import React from 'react';
 import styled from 'styled-components/macro';
 import App from '../App';
+import Player from './Player';
 
 const Wrapper = styled.div`
   height: 100vh;
@@ -24,7 +25,9 @@ const Layout = () => {
       <MainContainer>
         <App />
       </MainContainer>
-      <PlayerContainer>TODO: player goes here</PlayerContainer>
+      <PlayerContainer>
+        <Player />
+      </PlayerContainer>
     </Wrapper>
   );
 };
