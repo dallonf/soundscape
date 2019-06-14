@@ -124,7 +124,7 @@ const Player = observer(() => {
                 : player.currentSoundProgress
             }
             onChange={(e, value) => {
-              player.currentSoundProgress = value;
+              player.currentSoundProgress = value as number;
             }}
           />
         </Box>
