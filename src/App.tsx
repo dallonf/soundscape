@@ -34,8 +34,6 @@ const App = observer(
     render() {
       const { appState } = this.props;
       const { nextTrack, player, palette } = appState;
-      const paused =
-        player.state.type === 'PAUSED' || player.state.type === 'PAUSING';
       return (
         <div>
           <h2>Palette</h2>
@@ -48,14 +46,10 @@ const App = observer(
                   <button onClick={() => player.play(paletteTrack)}>
                     Play
                   </button>
-                  <button
-                    onClick={() => (appState.nextTrack = paletteTrack)}
-                  >
+                  <button onClick={() => (appState.nextTrack = paletteTrack)}>
                     Set Next
                   </button>
-                  <button
-                    onClick={() => palette.tracks.splice(i, 1)}
-                  >
+                  <button onClick={() => palette.tracks.splice(i, 1)}>
                     Remove
                   </button>
                 </li>
@@ -70,40 +64,6 @@ const App = observer(
               Play {nextTrack.name}
             </button>
           )}
-          <button onClick={() => player.fadeOutAndStop()}>Stop</button>
-          <div>
-            {player.currentSound && (
-              <div>
-                Now playing: {player.currentSound.track.name}
-                <br />
-                <input
-                  type="range"
-                  max={
-                    player.currentSoundDuration == null
-                      ? undefined
-                      : player.currentSoundDuration
-                  }
-                  value={
-                    player.currentSoundProgress == null
-                      ? undefined
-                      : player.currentSoundProgress
-                  }
-                  onChange={e => {
-                    player.currentSoundProgress = e.target.valueAsNumber;
-                  }}
-                />
-                <br />
-                {player._currentSoundProgress}/
-                {player.currentSound.element.duration}
-                <br />
-                {paused ? (
-                  <button onClick={() => player.resume()}>Resume</button>
-                ) : (
-                  <button onClick={() => player.pause()}>Pause</button>
-                )}
-              </div>
-            )}
-          </div>
         </div>
       );
     }
@@ -111,12 +71,12 @@ const App = observer(
 );
 
 const AppController = () => (
-  <AppStateContext>
+  <AppStateContext.Consumer>
     {appState => {
       if (!appState) throw new Error('AppStateContext is required');
       return <App appState={appState} />;
     }}
-  </AppStateContext>
+  </AppStateContext.Consumer>
 );
 
 export default AppController;
