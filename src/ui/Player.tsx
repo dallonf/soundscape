@@ -4,6 +4,7 @@ import { Paper, Theme, Box, Typography } from '@material-ui/core';
 import { Slider } from '@material-ui/lab';
 import { makeStyles } from '@material-ui/styles';
 import { useAppStateContext } from '../structure/AppStateContext';
+import { formatTime } from './formatTime';
 
 const useStyles = makeStyles((theme: Theme) => ({
   root: {
@@ -22,6 +23,10 @@ const useStyles = makeStyles((theme: Theme) => ({
   },
   progress: {
     gridArea: 'progress',
+  },
+  time: {
+    gridArea: 'time',
+    fontVariantNumeric: 'tabular-nums',
   },
 }));
 
@@ -46,6 +51,14 @@ const Player = observer(() => {
             )}
           </Typography>
         </Box>
+        {player.currentSound && (
+          <Box className={classes.time}>
+            <Typography variant="overline">
+              {formatTime(player.currentSoundProgress! * 1000)} /{' '}
+              {formatTime(player.currentSoundDuration! * 1000)}
+            </Typography>
+          </Box>
+        )}
         <Box className={classes.progress}>
           <Slider
             disabled={player.state.type !== 'PLAYING'}
