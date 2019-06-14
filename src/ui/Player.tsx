@@ -13,7 +13,7 @@ import { formatTime } from './formatTime';
 
 const useStyles = makeStyles((theme: Theme) => ({
   root: {
-    padding: theme.spacing(2, 2, 2, 2),
+    padding: theme.spacing(2),
     overflow: 'hidden',
   },
   layout: {
@@ -54,22 +54,31 @@ const Player = observer(() => {
           <Typography variant="subtitle1">
             {player.currentSound ? (
               <>
-                <span style={{ fontWeight: 'bold' }}>Now Playing:</span>&nbsp;
+                <span style={{ fontWeight: 'bold' }}>
+                  {paused ? 'Paused:' : 'Now Playing:'}
+                </span>
+                &nbsp;
                 {player.currentSound.track.name}
+              </>
+            ) : (
+              <>
+                &nbsp;
+              </>
+            )}
+          </Typography>
+        </Box>
+        <Box className={classes.time}>
+          <Typography variant="overline">
+            {player.currentSound ? (
+              <>
+                {formatTime(player.currentSoundProgress! * 1000)} /{' '}
+                {formatTime(player.currentSoundDuration! * 1000)}
               </>
             ) : (
               <>&nbsp;</>
             )}
           </Typography>
         </Box>
-        {player.currentSound && (
-          <Box className={classes.time}>
-            <Typography variant="overline">
-              {formatTime(player.currentSoundProgress! * 1000)} /{' '}
-              {formatTime(player.currentSoundDuration! * 1000)}
-            </Typography>
-          </Box>
-        )}
         <Box className={classes.controlButtons}>
           {paused || !player.currentSound ? (
             <IconButton
