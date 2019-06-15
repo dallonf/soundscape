@@ -56,6 +56,10 @@ export default class Palette {
   dispose() {
     this.disposer();
   }
+
+  removeTrack(trackToRemove: MusicTrack): void {
+    this.tracks = this.tracks.filter(t => t.id !== trackToRemove.id);
+  }
 }
 decorate(Palette, {
   tracks: observable,

@@ -1,5 +1,6 @@
 import * as pathModule from 'path';
 import * as electronModule from 'electron';
+import * as _ from 'lodash';
 
 const path = window.require('path') as typeof pathModule;
 const { dialog } = (window.require('electron') as typeof electronModule).remote;
@@ -8,10 +9,12 @@ class MusicTrack {
   loaded = false;
   filePath: string;
   context: AudioContext;
+  id: string;
 
   constructor(filePath: string, context: AudioContext) {
     this.filePath = filePath;
     this.context = context;
+    this.id = _.uniqueId();
   }
 
   get name() {

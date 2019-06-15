@@ -6,8 +6,12 @@ import {
   ListItemText,
   IconButton,
   ListItemIcon,
+  ListItemSecondaryAction,
 } from '@material-ui/core';
-import { PlayArrow as PlayArrowIcon } from '@material-ui/icons';
+import {
+  PlayArrow as PlayArrowIcon,
+  Delete as DeleteIcon,
+} from '@material-ui/icons';
 import { useAppStateContext } from '../../structure/AppStateContext';
 
 const TrackList = observer(() => {
@@ -22,7 +26,7 @@ const TrackList = observer(() => {
           const isPlaying =
             player.currentSound && player.currentSound.track === track;
           return (
-            <ListItem key={track.filePath}>
+            <ListItem key={track.id} dense={true}>
               <ListItemIcon>
                 <IconButton
                   edge="start"
@@ -33,6 +37,15 @@ const TrackList = observer(() => {
                 </IconButton>
               </ListItemIcon>
               <ListItemText primary={track.name} secondary={track.dirname} />
+              <ListItemSecondaryAction>
+                <IconButton
+                  edge="end"
+                  aria-label="Delete"
+                  onClick={() => palette.removeTrack(track)}
+                >
+                  <DeleteIcon />
+                </IconButton>
+              </ListItemSecondaryAction>
             </ListItem>
           );
         })}
