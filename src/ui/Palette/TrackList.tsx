@@ -13,47 +13,79 @@ import {
   Delete as DeleteIcon,
 } from '@material-ui/icons';
 import { useAppStateContext } from '../../structure/AppStateContext';
+import MusicTrack from '../../logic/MusicTrack';
+import Player from '../../logic/Player';
+import Palette from '../../logic/Palette';
 
 const TrackList = observer(() => {
   const appState = useAppStateContext();
 
   const { palette, player } = appState;
 
-  if (palette.tracks.length) {
-    return (
-      <List>
-        {palette.tracks.map(track => {
-          const isPlaying =
-            player.currentSound && player.currentSound.track === track;
-          return (
-            <ListItem key={track.id} dense={true}>
-              <ListItemIcon>
-                <IconButton
-                  edge="start"
-                  onClick={() => player.play(track)}
-                  color={isPlaying ? 'secondary' : undefined}
-                >
-                  <PlayArrowIcon />
-                </IconButton>
-              </ListItemIcon>
-              <ListItemText primary={track.name} secondary={track.dirname} />
-              <ListItemSecondaryAction>
-                <IconButton
-                  edge="end"
-                  aria-label="Delete"
-                  onClick={() => palette.removeTrack(track)}
-                >
-                  <DeleteIcon />
-                </IconButton>
-              </ListItemSecondaryAction>
-            </ListItem>
-          );
-        })}
-      </List>
-    );
-  } else {
-    return null;
-  }
+  return (
+    <List>
+      {palette.tracks.map(track => {
+        return (
+          <TrackListItem
+            key={track.id}
+            track={track}
+            player={player}
+            palette={palette}
+          />
+        );
+      })}
+    </List>
+  );
 });
+
+const TrackListItem = ({
+  track,
+  player,
+  palette,
+}: {
+  track: MusicTrack;
+  player: Player;
+  palette: Palette;
+}) => {
+  const [isFocused, setFocused] = React.useState(false);
+  const [isHovered, setHovered] = React.useState(false);
+  const isActive = isFocused || isHovered;
+
+  const isPlaying = player.currentSound && player.currentSound.track === track;
+
+  const focusProps = {
+    onPointerEnter: () => setHovered(true),
+    onPointerLeave: () => setHovered(false),
+    onFocus: () => setFocused(true),
+    onBlur: () => setFocused(false),
+  };
+
+  return (
+    <ListItem key={track.id} dense={true} {...focusProps}>
+      <ListItemIcon>
+        <IconButton
+          edge="start"
+          onClick={() => player.play(track)}
+          color={isPlaying ? 'secondary' : undefined}
+        >
+          <PlayArrowIcon />
+        </IconButton>
+      </ListItemIcon>
+      <ListItemText primary={track.name} secondary={track.dirname} />
+      <ListItemSecondaryAction
+        style={{ opacity: isActive ? 1 : 0 }}
+      >
+        <IconButton
+          edge="end"
+          aria-label="Delete"
+          onClick={() => palette.removeTrack(track)}
+          {...focusProps}
+        >
+          <DeleteIcon />
+        </IconButton>
+      </ListItemSecondaryAction>
+    </ListItem>
+  );
+};
 
 export default TrackList;
