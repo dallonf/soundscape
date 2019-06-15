@@ -38,11 +38,21 @@ const useStyles = makeStyles((theme: Theme) => ({
 const Palette = observer(() => {
   const classnames = useStyles();
   const appState = useAppStateContext();
+  const scrollContainerRef = React.useRef<HTMLDivElement>(null);
 
   const handleAddToPalette = async () => {
     const result = await selectMultipleMusicTracksDialog(appState.audioContext);
     if (result && result.length) {
       appState.palette.tracks.push(...result);
+    }
+  };
+
+  const scrollToBottom = () => {
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollTo(
+        0,
+        scrollContainerRef.current.scrollHeight
+      );
     }
   };
 
@@ -53,15 +63,18 @@ const Palette = observer(() => {
           <Typography variant="h6">Palette</Typography>
         </Toolbar>
       </AppBar>
+      <button onClick={scrollToBottom}>scroll to bottom</button>
       {appState.palette.tracks.length ? (
-        <div className={classnames.scrolling}>
+        <div className={classnames.scrolling} ref={scrollContainerRef}>
           <TrackList />
         </div>
       ) : (
         <div className={classnames.emptyContainer}>
-            <Typography variant="h6">Empty palette</Typography>
-            <Typography variant="body1">Add some music to get started.</Typography>
-          </div>
+          <Typography variant="h6">Empty palette</Typography>
+          <Typography variant="body1">
+            Add some music to get started.
+          </Typography>
+        </div>
       )}
 
       <Fab
