@@ -19,41 +19,37 @@ const TrackList = observer(() => {
 
   const { palette, player } = appState;
 
-  if (palette.tracks.length) {
-    return (
-      <List>
-        {palette.tracks.map(track => {
-          const isPlaying =
-            player.currentSound && player.currentSound.track === track;
-          return (
-            <ListItem key={track.id} dense={true}>
-              <ListItemIcon>
-                <IconButton
-                  edge="start"
-                  onClick={() => player.play(track)}
-                  color={isPlaying ? 'secondary' : undefined}
-                >
-                  <PlayArrowIcon />
-                </IconButton>
-              </ListItemIcon>
-              <ListItemText primary={track.name} secondary={track.dirname} />
-              <ListItemSecondaryAction>
-                <IconButton
-                  edge="end"
-                  aria-label="Delete"
-                  onClick={() => palette.removeTrack(track)}
-                >
-                  <DeleteIcon />
-                </IconButton>
-              </ListItemSecondaryAction>
-            </ListItem>
-          );
-        })}
-      </List>
-    );
-  } else {
-    return null;
-  }
+  return (
+    <List>
+      {palette.tracks.map(track => {
+        const isPlaying =
+          player.currentSound && player.currentSound.track === track;
+        return (
+          <ListItem key={track.id} dense={true}>
+            <ListItemIcon>
+              <IconButton
+                edge="start"
+                onClick={() => player.play(track)}
+                color={isPlaying ? 'secondary' : undefined}
+              >
+                <PlayArrowIcon />
+              </IconButton>
+            </ListItemIcon>
+            <ListItemText primary={track.name} secondary={track.dirname} />
+            <ListItemSecondaryAction>
+              <IconButton
+                edge="end"
+                aria-label="Delete"
+                onClick={() => palette.removeTrack(track)}
+              >
+                <DeleteIcon />
+              </IconButton>
+            </ListItemSecondaryAction>
+          </ListItem>
+        );
+      })}
+    </List>
+  );
 });
 
 export default TrackList;

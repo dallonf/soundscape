@@ -20,6 +20,14 @@ const useStyles = makeStyles((theme: Theme) => ({
     overflowY: 'auto',
     paddingBottom: 50 + theme.spacing(2),
   },
+  emptyContainer: {
+    display: 'flex',
+    flex: 1,
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    textAlign: 'center',
+  },
   fab: {
     position: 'absolute',
     bottom: theme.spacing(2),
@@ -45,9 +53,17 @@ const Palette = observer(() => {
           <Typography variant="h6">Palette</Typography>
         </Toolbar>
       </AppBar>
-      <div className={classnames.scrolling}>
-        <TrackList />
-      </div>
+      {appState.palette.tracks.length ? (
+        <div className={classnames.scrolling}>
+          <TrackList />
+        </div>
+      ) : (
+        <div className={classnames.emptyContainer}>
+            <Typography variant="h6">Empty palette</Typography>
+            <Typography variant="body1">Add some music to get started.</Typography>
+          </div>
+      )}
+
       <Fab
         color="primary"
         onClick={handleAddToPalette}
