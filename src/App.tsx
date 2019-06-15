@@ -33,31 +33,10 @@ const App = observer(
 
     render() {
       const { appState } = this.props;
-      const { nextTrack, player, palette } = appState;
+      const { nextTrack, player } = appState;
       return (
         <div>
-          <h2>Palette</h2>
-          {palette.tracks.length ? (
-            <ul>
-              {palette.tracks.map((paletteTrack, i) => (
-                <li key={i}>
-                  {paletteTrack.name}
-                  <br />
-                  <button onClick={() => player.play(paletteTrack)}>
-                    Play
-                  </button>
-                  <button onClick={() => (appState.nextTrack = paletteTrack)}>
-                    Set Next
-                  </button>
-                  <button onClick={() => palette.tracks.splice(i, 1)}>
-                    Remove
-                  </button>
-                </li>
-              ))}
-            </ul>
-          ) : null}
-          <button onClick={this.handleAddToPalette}>Add</button>
-          <h2>Player</h2>
+          <button onClick={this.handleAddToPalette}>Add to palette</button>
           <button onClick={this.handleChooseNext}>Pick track</button>
           {nextTrack && (
             <button onClick={() => player.play(nextTrack)}>
