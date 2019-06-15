@@ -2,11 +2,13 @@ import React from 'react';
 import styled from 'styled-components/macro';
 import App from '../App';
 import Player from './Player';
+import Palette from './Palette';
 
 const Wrapper = styled.div`
   height: 100vh;
   display: grid;
-  grid-template-areas: 'main' 'player';
+  grid-template-areas: 'main sidebar' 'player player';
+  grid-template-columns: 1fr 250px;
   grid-template-rows: 1fr auto;
 `;
 
@@ -19,12 +21,19 @@ const PlayerContainer = styled.div`
   grid-area: player;
 `;
 
+const SidebarContainer = styled.div`
+  grid-area: sidebar;
+`;
+
 const Layout = () => {
   return (
     <Wrapper>
       <MainContainer>
-        <App />
+        <Palette />
       </MainContainer>
+      <SidebarContainer>
+        <App />
+      </SidebarContainer>
       <PlayerContainer>
         <Player />
       </PlayerContainer>
