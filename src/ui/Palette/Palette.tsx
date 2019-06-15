@@ -40,19 +40,20 @@ const Palette = observer(() => {
   const appState = useAppStateContext();
   const scrollContainerRef = React.useRef<HTMLDivElement>(null);
 
-  const handleAddToPalette = async () => {
-    const result = await selectMultipleMusicTracksDialog(appState.audioContext);
-    if (result && result.length) {
-      appState.palette.tracks.push(...result);
-    }
-  };
-
   const scrollToBottom = () => {
     if (scrollContainerRef.current) {
       scrollContainerRef.current.scrollTo(
         0,
         scrollContainerRef.current.scrollHeight
       );
+    }
+  };
+
+  const handleAddToPalette = async () => {
+    const result = await selectMultipleMusicTracksDialog(appState.audioContext);
+    if (result && result.length) {
+      appState.palette.tracks.push(...result);
+      scrollToBottom();
     }
   };
 
@@ -63,7 +64,6 @@ const Palette = observer(() => {
           <Typography variant="h6">Palette</Typography>
         </Toolbar>
       </AppBar>
-      <button onClick={scrollToBottom}>scroll to bottom</button>
       {appState.palette.tracks.length ? (
         <div className={classnames.scrolling} ref={scrollContainerRef}>
           <TrackList />
