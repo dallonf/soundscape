@@ -53,13 +53,15 @@ const TrackListItem = ({
 
   const isPlaying = player.currentSound && player.currentSound.track === track;
 
+  const focusProps = {
+    onPointerEnter: () => setHovered(true),
+    onPointerLeave: () => setHovered(false),
+    onFocus: () => setFocused(true),
+    onBlur: () => setFocused(false),
+  };
+
   return (
-    <ListItem
-      key={track.id}
-      dense={true}
-      onPointerEnter={() => setHovered(true)}
-      onPointerLeave={() => setHovered(false)}
-    >
+    <ListItem key={track.id} dense={true} {...focusProps}>
       <ListItemIcon>
         <IconButton
           edge="start"
@@ -71,14 +73,13 @@ const TrackListItem = ({
       </ListItemIcon>
       <ListItemText primary={track.name} secondary={track.dirname} />
       <ListItemSecondaryAction
-        style={{ visibility: isActive ? 'visible' : 'hidden' }}
+        style={{ opacity: isActive ? 1 : 0 }}
       >
         <IconButton
           edge="end"
           aria-label="Delete"
           onClick={() => palette.removeTrack(track)}
-          onPointerEnter={() => setHovered(true)}
-          onPointerLeave={() => setHovered(false)}
+          {...focusProps}
         >
           <DeleteIcon />
         </IconButton>
