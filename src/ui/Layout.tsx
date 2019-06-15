@@ -14,8 +14,9 @@ const Wrapper = styled.div`
 
 const MainContainer = styled.div`
   grid-area: main;
-  overflow: auto;
   position: relative;
+  display: flex;
+  flex-direction: column;
 `;
 
 const PlayerContainer = styled.div`

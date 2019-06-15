@@ -8,13 +8,22 @@ import { selectMultipleMusicTracksDialog } from '../../logic/MusicTrack';
 import { makeStyles } from '@material-ui/styles';
 
 const useStyles = makeStyles((theme: Theme) => ({
-  root: {},
+  root: {
+    flex: '1 1 0',
+    display: 'flex',
+    flexDirection: 'column',
+    position: 'relative',
+    overflow: 'hidden',
+  },
+  scrolling: {
+    flex: '1 1 0',
+    overflowY: 'auto',
+    paddingBottom: 50 + theme.spacing(2),
+  },
   fab: {
-    display: 'flex', // defaults to inline-flex
-    position: 'sticky',
+    position: 'absolute',
     bottom: theme.spacing(2),
     right: theme.spacing(2),
-    marginLeft: 'auto',
   },
 }));
 
@@ -31,12 +40,14 @@ const Palette = observer(() => {
 
   return (
     <div className={classnames.root}>
-      <AppBar position="sticky">
+      <AppBar position="static">
         <Toolbar>
           <Typography variant="h6">Palette</Typography>
         </Toolbar>
       </AppBar>
-      <TrackList />
+      <div className={classnames.scrolling}>
+        <TrackList />
+      </div>
       <Fab
         color="primary"
         onClick={handleAddToPalette}
