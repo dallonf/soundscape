@@ -1,5 +1,6 @@
 import React from 'react';
 import { AppBar, Toolbar, Typography } from '@material-ui/core';
+import TrackList from './TrackList';
 
 const Palette = () => {
   return (
@@ -9,6 +10,7 @@ const Palette = () => {
           <Typography variant="h6">Palette</Typography>
         </Toolbar>
       </AppBar>
+      <TrackList />
     </>
   );
 };

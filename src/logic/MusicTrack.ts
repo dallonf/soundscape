@@ -19,6 +19,10 @@ class MusicTrack {
     return path.basename(this.filePath, ext);
   }
 
+  get dirname() {
+    return path.dirname(this.filePath);
+  }
+
   async createNode() {
     const element = new Audio(this.filePath);
     const loadedPromise = new Promise(resolve =>

@@ -2,7 +2,7 @@ import React from 'react';
 import styled from 'styled-components/macro';
 import App from '../App';
 import Player from './Player';
-import Palette from './Palette';
+import Palette from './Palette/Palette';
 
 const Wrapper = styled.div`
   height: 100vh;
@@ -23,6 +23,7 @@ const PlayerContainer = styled.div`
 
 const SidebarContainer = styled.div`
   grid-area: sidebar;
+  overflow: auto;
 `;
 
 const Layout = () => {
