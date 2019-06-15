@@ -22,21 +22,11 @@ const App = observer(
       }
     };
 
-    handleAddToPalette = async () => {
-      const result = await selectMultipleMusicTracksDialog(
-        this.props.appState.audioContext
-      );
-      if (result && result.length) {
-        this.props.appState.palette.tracks.push(...result);
-      }
-    };
-
     render() {
       const { appState } = this.props;
       const { nextTrack, player } = appState;
       return (
         <div>
-          <button onClick={this.handleAddToPalette}>Add to palette</button>
           <button onClick={this.handleChooseNext}>Pick track</button>
           {nextTrack && (
             <button onClick={() => player.play(nextTrack)}>

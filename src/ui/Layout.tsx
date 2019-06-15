@@ -15,6 +15,7 @@ const Wrapper = styled.div`
 const MainContainer = styled.div`
   grid-area: main;
   overflow: auto;
+  position: relative;
 `;
 
 const PlayerContainer = styled.div`
