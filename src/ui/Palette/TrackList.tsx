@@ -1,6 +1,12 @@
 import React, { EventHandler, SyntheticEvent } from 'react';
-import { observer } from 'mobx-react';
-import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
+import { observer, Observer } from 'mobx-react';
+import {
+  DragDropContext,
+  Droppable,
+  Draggable,
+  DragDropContextProps,
+  DroppableProvided,
+} from 'react-beautiful-dnd';
 import {
   List,
   ListItem,
@@ -25,24 +31,52 @@ const TrackList = observer(() => {
 
   const { palette, player } = appState;
 
+  const handleDragEnd: DragDropContextProps['onDragEnd'] = result => {
+    if (
+      !result.destination ||
+      result.destination.index === result.source.index ||
+      result.destination.droppableId !== 'palette' ||
+      result.source.droppableId !== 'palette'
+    ) {
+      // no drag has occurred
+      return;
+    }
+
+    const newList = palette.tracks.map((track, i) => {
+      if (i === result.source.index) {
+        return palette.tracks[result.destination!.index];
+      } else if (i === result.destination!.index) {
+        return palette.tracks[result.source.index];
+      } else {
+        return track;
+      }
+    });
+
+    palette.tracks = newList;
+  };
+
   return (
-    <DragDropContext onDragEnd={() => {}}>
+    <DragDropContext onDragEnd={handleDragEnd}>
       <Droppable droppableId="palette">
         {provided => (
-          <List {...provided.droppableProps} ref={provided.innerRef}>
-            {palette.tracks.map((track, index) => {
-              return (
-                <TrackListItem
-                  key={track.id}
-                  track={track}
-                  index={index}
-                  player={player}
-                  palette={palette}
-                />
-              );
-            })}
-            {provided.placeholder}
-          </List>
+          <Observer>
+            {() => (
+              <List {...provided.droppableProps} ref={provided.innerRef}>
+                {palette.tracks.map((track, index) => {
+                  return (
+                    <TrackListItem
+                      key={track.id}
+                      track={track}
+                      index={index}
+                      player={player}
+                      palette={palette}
+                    />
+                  );
+                })}
+                {provided.placeholder}
+              </List>
+            )}
+          </Observer>
         )}
       </Droppable>
     </DragDropContext>
@@ -69,81 +103,91 @@ const useItemStyles = makeStyles((theme: Theme) => ({
   },
 }));
 
-const TrackListItem = ({
-  track,
-  index,
-  player,
-  palette,
-}: {
-  track: MusicTrack;
-  index: number;
-  player: Player;
-  palette: Palette;
-}) => {
-  const classes = useItemStyles();
-  const [isFocused, setFocused] = React.useState(false);
-  const [isHovered, setHovered] = React.useState(false);
-  const isActive = isFocused || isHovered;
+const TrackListItem = observer(
+  ({
+    track,
+    index,
+    player,
+    palette,
+  }: {
+    track: MusicTrack;
+    index: number;
+    player: Player;
+    palette: Palette;
+  }) => {
+    const classes = useItemStyles();
+    const [isFocused, setFocused] = React.useState(false);
+    const [isHovered, setHovered] = React.useState(false);
+    const isActive = isFocused || isHovered;
 
-  const isPlaying = player.currentSound && player.currentSound.track === track;
+    const isPlaying =
+      player.currentSound && player.currentSound.track === track;
 
-  const focusProps = {
-    onPointerEnter: () => setHovered(true),
-    onPointerLeave: () => setHovered(false),
-    onFocus: () => setFocused(true),
-    onBlur: () => setFocused(false),
-  };
+    const focusProps = {
+      onPointerEnter: () => setHovered(true),
+      onPointerLeave: () => setHovered(false),
+      onFocus: () => setFocused(true),
+      onBlur: () => setFocused(false),
+    };
 
-  return (
-    <Draggable draggableId={track.id} index={index}>
-      {provided => {
-        return (
-          (console.log(provided) as any) || (
-            <ListItem
-              key={track.id}
-              className={classes.item}
-              dense={true}
-              ref={provided.innerRef}
-              {...provided.draggableProps}
-              {...provided.dragHandleProps}
-              {...focusProps}
-              onFocus={composeDomEventHandler(
-                (provided.draggableProps as DivProps).onFocus,
-                (provided.dragHandleProps as DivProps).onFocus,
-                focusProps.onFocus
-              )}
-              onBlur={composeDomEventHandler(
-                (provided.draggableProps as DivProps).onBlur,
-                (provided.dragHandleProps as DivProps).onBlur,
-                focusProps.onBlur
-              )}
-            >
-              <ListItemIcon>
-                <IconButton
-                  edge="start"
-                  onClick={() => player.play(track)}
-                  color={isPlaying ? 'secondary' : undefined}
-                >
-                  <PlayArrowIcon />
-                </IconButton>
-              </ListItemIcon>
-              <ListItemText primary={track.name} secondary={track.dirname} />
-              <ListItemSecondaryAction style={{ opacity: isActive ? 1 : 0 }}>
-                <IconButton
-                  edge="end"
-                  aria-label="Delete"
-                  onClick={() => palette.removeTrack(track)}
+    return (
+      <Draggable draggableId={track.id} index={index}>
+        {provided => (
+          <Observer>
+            {() => {
+              return (
+                <ListItem
+                  key={track.id}
+                  className={classes.item}
+                  dense={true}
+                  ref={provided.innerRef}
+                  {...provided.draggableProps}
+                  {...provided.dragHandleProps}
                   {...focusProps}
+                  onFocus={composeDomEventHandler(
+                    (provided.draggableProps as DivProps).onFocus,
+                    (provided.dragHandleProps as DivProps).onFocus,
+                    focusProps.onFocus
+                  )}
+                  onBlur={composeDomEventHandler(
+                    (provided.draggableProps as DivProps).onBlur,
+                    (provided.dragHandleProps as DivProps).onBlur,
+                    focusProps.onBlur
+                  )}
                 >
-                  <DeleteIcon />
-                </IconButton>
-              </ListItemSecondaryAction>
-            </ListItem>
-          )
-        );
-      }}
-    </Draggable>
-  );
-};
+                  <ListItemIcon>
+                    <IconButton
+                      edge="start"
+                      onClick={() => player.play(track)}
+                      color={isPlaying ? 'secondary' : undefined}
+                    >
+                      <PlayArrowIcon />
+                    </IconButton>
+                  </ListItemIcon>
+                  <ListItemText
+                    primary={track.name}
+                    secondary={track.dirname}
+                  />
+                  <ListItemSecondaryAction
+                    style={{ opacity: isActive ? 1 : 0 }}
+                  >
+                    <IconButton
+                      edge="end"
+                      aria-label="Delete"
+                      onClick={() => palette.removeTrack(track)}
+                      {...focusProps}
+                    >
+                      <DeleteIcon />
+                    </IconButton>
+                  </ListItemSecondaryAction>
+                </ListItem>
+              );
+            }}
+          </Observer>
+        )}
+      </Draggable>
+    );
+  }
+);
 
 export default TrackList;
