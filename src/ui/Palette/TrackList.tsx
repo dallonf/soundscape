@@ -129,7 +129,7 @@ const TrackListItem = observer(
 
     return (
       <Draggable draggableId={track.id} index={index}>
-        {provided => (
+        {(provided, snapshot) => (
           <Observer>
             {() => {
               return (
@@ -165,18 +165,20 @@ const TrackListItem = observer(
                     primary={track.name}
                     secondary={track.dirname}
                   />
-                  <ListItemSecondaryAction
-                    style={{ opacity: isActive ? 1 : 0 }}
-                  >
-                    <IconButton
-                      edge="end"
-                      aria-label="Delete"
-                      onClick={() => palette.removeTrack(track)}
-                      {...focusProps}
+                  {(!snapshot || !snapshot.isDragging) && (
+                    <ListItemSecondaryAction
+                      style={{ opacity: isActive ? 1 : 0 }}
                     >
-                      <DeleteIcon />
-                    </IconButton>
-                  </ListItemSecondaryAction>
+                      <IconButton
+                        edge="end"
+                        aria-label="Delete"
+                        onClick={() => palette.removeTrack(track)}
+                        {...focusProps}
+                      >
+                        <DeleteIcon />
+                      </IconButton>
+                    </ListItemSecondaryAction>
+                  )}
                 </ListItem>
               );
             }}
