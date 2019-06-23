@@ -133,53 +133,62 @@ const TrackListItem = observer(
           <Observer>
             {() => {
               return (
-                <ListItem
-                  key={track.id}
-                  className={classes.item}
-                  dense={true}
-                  ref={provided.innerRef}
-                  {...provided.draggableProps}
-                  {...provided.dragHandleProps}
-                  {...focusProps}
-                  onFocus={composeDomEventHandler(
-                    (provided.draggableProps as DivProps).onFocus,
-                    (provided.dragHandleProps as DivProps).onFocus,
-                    focusProps.onFocus
-                  )}
-                  onBlur={composeDomEventHandler(
-                    (provided.draggableProps as DivProps).onBlur,
-                    (provided.dragHandleProps as DivProps).onBlur,
-                    focusProps.onBlur
-                  )}
-                >
-                  <ListItemIcon>
-                    <IconButton
-                      edge="start"
-                      onClick={() => player.play(track)}
-                      color={isPlaying ? 'secondary' : undefined}
-                    >
-                      <PlayArrowIcon />
-                    </IconButton>
-                  </ListItemIcon>
-                  <ListItemText
-                    primary={track.name}
-                    secondary={track.dirname}
+                <React.Fragment key={track.id}>
+                  <ForceInactiveWhileDragging
+                    setInactive={() => {
+                      setFocused(false);
+                      setHovered(false);
+                    }}
+                    isActive={isActive}
+                    isDragging={Boolean(snapshot && snapshot.isDragging)}
                   />
-                  {(!snapshot || !snapshot.isDragging) && (
-                    <ListItemSecondaryAction
-                      style={{ opacity: isActive ? 1 : 0 }}
-                    >
+                  <ListItem
+                    className={classes.item}
+                    dense={true}
+                    ref={provided.innerRef}
+                    {...provided.draggableProps}
+                    {...provided.dragHandleProps}
+                    {...focusProps}
+                    onFocus={composeDomEventHandler(
+                      (provided.draggableProps as DivProps).onFocus,
+                      (provided.dragHandleProps as DivProps).onFocus,
+                      focusProps.onFocus
+                    )}
+                    onBlur={composeDomEventHandler(
+                      (provided.draggableProps as DivProps).onBlur,
+                      (provided.dragHandleProps as DivProps).onBlur,
+                      focusProps.onBlur
+                    )}
+                  >
+                    <ListItemIcon>
                       <IconButton
-                        edge="end"
-                        aria-label="Delete"
-                        onClick={() => palette.removeTrack(track)}
-                        {...focusProps}
+                        edge="start"
+                        onClick={() => player.play(track)}
+                        color={isPlaying ? 'secondary' : undefined}
                       >
-                        <DeleteIcon />
+                        <PlayArrowIcon />
                       </IconButton>
-                    </ListItemSecondaryAction>
-                  )}
-                </ListItem>
+                    </ListItemIcon>
+                    <ListItemText
+                      primary={track.name}
+                      secondary={track.dirname}
+                    />
+                    {(!snapshot || !snapshot.isDragging) && (
+                      <ListItemSecondaryAction
+                        style={{ opacity: isActive ? 1 : 0 }}
+                      >
+                        <IconButton
+                          edge="end"
+                          aria-label="Delete"
+                          onClick={() => palette.removeTrack(track)}
+                          {...focusProps}
+                        >
+                          <DeleteIcon />
+                        </IconButton>
+                      </ListItemSecondaryAction>
+                    )}
+                  </ListItem>
+                </React.Fragment>
               );
             }}
           </Observer>
@@ -188,5 +197,23 @@ const TrackListItem = observer(
     );
   }
 );
+
+const ForceInactiveWhileDragging = ({
+  setInactive,
+  isActive,
+  isDragging,
+}: {
+  setInactive: () => void;
+  isActive: boolean;
+  isDragging: boolean;
+}) => {
+  React.useEffect(() => {
+    if (isActive && isDragging) {
+      setInactive();
+    }
+  });
+
+  return null;
+};
 
 export default TrackList;
