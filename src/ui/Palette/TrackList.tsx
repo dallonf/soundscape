@@ -5,7 +5,6 @@ import {
   Droppable,
   Draggable,
   DragDropContextProps,
-  DroppableProvided,
 } from 'react-beautiful-dnd';
 import {
   List,
@@ -42,15 +41,13 @@ const TrackList = observer(() => {
       return;
     }
 
-    const newList = palette.tracks.map((track, i) => {
-      if (i === result.source.index) {
-        return palette.tracks[result.destination!.index];
-      } else if (i === result.destination!.index) {
-        return palette.tracks[result.source.index];
-      } else {
-        return track;
-      }
-    });
+    const newList = [...palette.tracks];
+    newList.splice(result.source.index, 1);
+    newList.splice(
+      result.destination.index,
+      0,
+      palette.tracks[result.source.index]
+    );
 
     palette.tracks = newList;
   };
