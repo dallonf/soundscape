@@ -1,43 +1,47 @@
 import React from 'react';
-import styled from 'styled-components/macro';
+import { Theme } from '@material-ui/core';
+import { makeStyles } from '@material-ui/styles';
 import Player from './Player';
 import Palette from './Palette/Palette';
 
-const Wrapper = styled.div`
-  height: 100vh;
-  display: grid;
-  // grid-template-areas: 'main sidebar' 'player player';
-  // grid-template-columns: 1fr 250px;
-  grid-template-areas: 'main' 'player';
-  grid-template-rows: 1fr auto;
-`;
-
-const MainContainer = styled.div`
-  grid-area: main;
-  position: relative;
-  display: flex;
-  flex-direction: column;
-`;
-
-const PlayerContainer = styled.div`
-  grid-area: player;
-`;
-
-// const SidebarContainer = styled.div`
-//   grid-area: sidebar;
-//   overflow: auto;
-// `;
+const useStyles = makeStyles((theme: Theme) => ({
+  wrapper: {
+    height: '100vh',
+    background: theme.palette.background.default,
+    // grid-template-areas: 'main sidebar' 'player player';
+    // grid-template-columns: 1fr 250px;
+    display: 'grid',
+    gridTemplateAreas: "'main' 'player'",
+    gridTemplateRows: '1fr auto',
+  },
+  mainContainer: {
+    gridArea: 'main',
+    position: 'relative',
+    display: 'flex',
+    flexDirection: 'column',
+    zIndex: 0,
+  },
+  playerContainer: {
+    gridArea: 'player',
+    zIndex: 1,
+  },
+  // sidebarContainer: {
+  //   gridArea: 'player',
+  //   overflow: 'auto',
+  // },
+}));
 
 const Layout = () => {
+  const classes = useStyles();
   return (
-    <Wrapper>
-      <MainContainer>
+    <div className={classes.wrapper}>
+      <div className={classes.mainContainer}>
         <Palette />
-      </MainContainer>
-      <PlayerContainer>
+      </div>
+      <div className={classes.playerContainer}>
         <Player />
-      </PlayerContainer>
-    </Wrapper>
+      </div>
+    </div>
   );
 };
 
