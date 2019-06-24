@@ -39,6 +39,7 @@ const Palette = observer(() => {
   const classnames = useStyles();
   const appState = useAppStateContext();
   const scrollContainerRef = React.useRef<HTMLDivElement>(null);
+  const [dragInProgress, setDragInProgress] = React.useState(false);
 
   const scrollToBottom = () => {
     if (scrollContainerRef.current) {
@@ -66,7 +67,10 @@ const Palette = observer(() => {
       </AppBar>
       {appState.palette.tracks.length ? (
         <div className={classnames.scrolling} ref={scrollContainerRef}>
-          <TrackList />
+          <TrackList
+            onDragStart={() => setDragInProgress(true)}
+            onDragEnd={() => setDragInProgress(false)}
+          />
         </div>
       ) : (
         <div className={classnames.emptyContainer}>
@@ -77,14 +81,16 @@ const Palette = observer(() => {
         </div>
       )}
 
-      <Fab
-        color="primary"
-        onClick={handleAddToPalette}
-        className={classnames.fab}
-        title="Add new tracks to palette"
-      >
-        <AddIcon />
-      </Fab>
+      {!dragInProgress && (
+        <Fab
+          color="primary"
+          onClick={handleAddToPalette}
+          className={classnames.fab}
+          title="Add new tracks to palette"
+        >
+          <AddIcon />
+        </Fab>
+      )}
     </div>
   );
 });

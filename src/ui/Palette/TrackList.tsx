@@ -25,60 +25,73 @@ import Player from '../../logic/Player';
 import Palette from '../../logic/Palette';
 import { makeStyles } from '@material-ui/styles';
 
-const TrackList = observer(() => {
-  const appState = useAppStateContext();
+const TrackList = observer(
+  ({
+    onDragStart,
+    onDragEnd,
+  }: {
+    onDragStart: () => void;
+    onDragEnd: () => void;
+  }) => {
+    const appState = useAppStateContext();
 
-  const { palette, player } = appState;
+    const { palette, player } = appState;
 
-  const handleDragEnd: DragDropContextProps['onDragEnd'] = result => {
-    if (
-      !result.destination ||
-      result.destination.index === result.source.index ||
-      result.destination.droppableId !== 'palette' ||
-      result.source.droppableId !== 'palette'
-    ) {
-      // no drag has occurred
-      return;
-    }
+    const handleDragEnd: DragDropContextProps['onDragEnd'] = result => {
+      onDragEnd();
 
-    const newList = [...palette.tracks];
-    newList.splice(result.source.index, 1);
-    newList.splice(
-      result.destination.index,
-      0,
-      palette.tracks[result.source.index]
+      if (
+        !result.destination ||
+        result.destination.index === result.source.index ||
+        result.destination.droppableId !== 'palette' ||
+        result.source.droppableId !== 'palette'
+      ) {
+        // no drag has occurred
+        return;
+      }
+
+      const newList = [...palette.tracks];
+      newList.splice(result.source.index, 1);
+      newList.splice(
+        result.destination.index,
+        0,
+        palette.tracks[result.source.index]
+      );
+
+      palette.tracks = newList;
+    };
+
+    return (
+      <DragDropContext
+        onDragStart={() => onDragStart()}
+        onDragEnd={handleDragEnd}
+      >
+        <Droppable droppableId="palette">
+          {provided => (
+            <Observer>
+              {() => (
+                <List {...provided.droppableProps} ref={provided.innerRef}>
+                  {palette.tracks.map((track, index) => {
+                    return (
+                      <TrackListItem
+                        key={track.id}
+                        track={track}
+                        index={index}
+                        player={player}
+                        palette={palette}
+                      />
+                    );
+                  })}
+                  {provided.placeholder}
+                </List>
+              )}
+            </Observer>
+          )}
+        </Droppable>
+      </DragDropContext>
     );
-
-    palette.tracks = newList;
-  };
-
-  return (
-    <DragDropContext onDragEnd={handleDragEnd}>
-      <Droppable droppableId="palette">
-        {provided => (
-          <Observer>
-            {() => (
-              <List {...provided.droppableProps} ref={provided.innerRef}>
-                {palette.tracks.map((track, index) => {
-                  return (
-                    <TrackListItem
-                      key={track.id}
-                      track={track}
-                      index={index}
-                      player={player}
-                      palette={palette}
-                    />
-                  );
-                })}
-                {provided.placeholder}
-              </List>
-            )}
-          </Observer>
-        )}
-      </Droppable>
-    </DragDropContext>
-  );
-});
+  }
+);
 
 const composeDomEventHandler = <T extends SyntheticEvent>(
   ...fns: (EventHandler<T> | undefined | null)[]
