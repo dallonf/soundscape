@@ -19,9 +19,11 @@ const useStyles = makeStyles((theme: Theme) => ({
     position: 'relative',
     display: 'flex',
     flexDirection: 'column',
+    zIndex: 0,
   },
   playerContainer: {
     gridArea: 'player',
+    zIndex: 1,
   },
   // sidebarContainer: {
   //   gridArea: 'player',
